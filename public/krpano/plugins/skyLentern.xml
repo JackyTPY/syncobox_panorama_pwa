@@ -1,0 +1,9 @@
+<krpano>
+    <action name="skyLentern">
+        txtadd(e, %1);
+        txtadd(f, %2);
+        jscall(calc('Event.fire("' + e +'","' + f + '")'));
+        set(e, '');
+        set(f, '');
+    </action>
+</krpano>
