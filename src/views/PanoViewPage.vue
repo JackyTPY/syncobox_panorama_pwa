@@ -5,6 +5,7 @@
 
 <script>
 // @ is an alias to /src
+import vue from "vue";
 import KrpanoViewer from "@/components/KrpanoViewer.vue";
 import { API } from "../api.js";
 
@@ -36,6 +37,9 @@ export default {
         this.project = this.extendProjectData(res.data);
       })
       .then(res => {
+        this.define_manifest();
+      })
+      .then(res => {
         this.projectLoaded = true;
       })
       .catch(err => {
@@ -44,7 +48,22 @@ export default {
     // this.set_manifest(project.manifest);
   },
   mounted() {
-    this.$forceUpdate();
+    let id = this.$route.params.id;
+    let refreshToken = this.$route.params.refreshToken;
+
+    var formData = new FormData();
+    formData.append("grant_type", 'refresh_token');
+    formData.append("client_id", 'portal-spa')
+    formData.append("refresh_token", refreshToken)
+
+    API.identity.refreshToken(formData)
+    .then(res => res.json())
+    .then(json => {
+      console.log(json)
+      localStorage.setItem("id", id);
+      localStorage.setItem("access_token", json.access_token)
+    })
+    
   },
   methods: {
     extendProjectData(pano) {
@@ -84,6 +103,44 @@ export default {
       };
 
       return formated;
+    },
+
+    define_manifest() {
+      let manifest = {
+        name: this.project.scene.name,
+        short_name: this.project.scene.name,
+        theme_color: "#4DBA87",
+        icons: [
+          {
+            src: "http://localhost:9002/img/icons/android-chrome-192x192.png",
+            sizes: "192x192",
+            type: "image/png"
+          },
+          {
+            src: "http://localhost:9002/img/icons/android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png"
+          },
+          {
+            src:
+              "http://localhost:9002/img/icons/android-chrome-maskable-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable"
+          },
+          {
+            src:
+              "http://localhost:9002/img/icons/android-chrome-maskable-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable"
+          }
+        ],
+        start_url: `http://localhost:9002/#/Panorama/view/${this.project.scene.id}/`,
+        display: "standalone",
+        background_color: "#000000"
+      };
+      this.set_manifest(manifest);
     },
 
     // set manifest dynamically

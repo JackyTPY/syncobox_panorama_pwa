@@ -5,7 +5,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/Panorama/view/:id?",
+    path: "/Panorama/view/:id/:refreshToken",
     name: "PanoramaViewer",
     component: () =>
         import ( /* webpackChunkName: "about" */ "../views/PanoViewPage.vue")

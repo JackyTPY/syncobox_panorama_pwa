@@ -61,7 +61,7 @@ export default {
         id: "krpanoSWFObject",
         xml: null,
         target: this.id ? "pano_" + this.id : "pano",
-        html5: "only",
+        html5: "prefer+preserveDrawingBuffer",
         webglsettings: {
           preserveDrawingBuffer: true
         },
