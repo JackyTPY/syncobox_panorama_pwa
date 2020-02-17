@@ -165,7 +165,7 @@ export default {
               }
               ${
                 this.project.plugins.scope
-                  ? '<layer name="target" url="%VIEWER%/krpano/plugins/scope.png" align="center" enabled="false" zorder="100" />'
+                  ? '<layer name="target" url="/krpano/plugins/scope.png" align="center" enabled="false" zorder="100" />'
                   : ""
               }
               <skin_settings 
@@ -307,7 +307,7 @@ export default {
       global.krpano.set("layer[mapactivespot].parent", "map");
       global.krpano.set(
         "layer[mapactivespot].url",
-        "%VIEWER%/krpano/plugins/mappointactive.png"
+        "/krpano/plugins/mappointactive.png"
       );
       global.krpano.set("layer[mapactivespot].align", "lefttop");
       global.krpano.set("layer[mapactivespot].edge", "center");
@@ -321,7 +321,7 @@ export default {
       global.krpano.set("layer[mapradar].parent", "map");
       global.krpano.set(
         "layer[mapradar].url",
-        "%VIEWER%/krpano/plugins/radar.js"
+        "/krpano/plugins/radar.js"
       );
       global.krpano.set("layer[mapradar].align", "lefttop");
       global.krpano.set("layer[mapradar].edge", "center");

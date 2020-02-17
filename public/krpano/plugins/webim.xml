@@ -191,8 +191,8 @@
 
   <!-- radar layer (overlays the normal spot too, but is behind the activespot image) -->
   <layer name="radar" keep="true"
-	       url.flash="%VIEWER%/krpano/plugins/radar.swf"
-	       url.html5="%VIEWER%/krpano/plugins/radar.js"
+	       url.flash="/krpano/plugins/radar.swf"
+	       url.html5="/krpano/plugins/radar.js"
 	       align="center" zorder="1"
 	       scale.mobile="1.5"
 	       fillalpha="0.3" fillcolor="0xFFFFFF"
@@ -201,7 +201,7 @@
 	       />
 
   <!-- active spot image (overlays the normal spot) -->
-  <layer name="activespot" url="%VIEWER%/krpano/plugins/mappointactive.png" keep="true"
+  <layer name="activespot" url="/krpano/plugins/mappointactive.png" keep="true"
 	       align="lefttop" edge="center" ox="32" oy="32"  zorder="2" scale.mobile="2"
          visible="false"
 	       />

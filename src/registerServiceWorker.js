@@ -12,10 +12,6 @@ if (process.env.NODE_ENV === 'production') {
     },
     registered() {
       console.log('Service worker has been registered.')
-      sendMessage({
-        type: 'UPDATE_PROJECT_ID',
-        id: window.location.href.split('/').slice(-1)[0]
-      })
     },
     cached() {
       console.log('Content has been cached for offline use.')

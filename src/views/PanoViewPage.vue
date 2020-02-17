@@ -47,24 +47,6 @@ export default {
       });
     // this.set_manifest(project.manifest);
   },
-  mounted() {
-    let id = this.$route.params.id;
-    let refreshToken = this.$route.params.refreshToken;
-
-    var formData = new FormData();
-    formData.append("grant_type", 'refresh_token');
-    formData.append("client_id", 'portal-spa')
-    formData.append("refresh_token", refreshToken)
-
-    API.identity.refreshToken(formData)
-    .then(res => res.json())
-    .then(json => {
-      console.log(json)
-      localStorage.setItem("id", id);
-      localStorage.setItem("access_token", json.access_token)
-    })
-    
-  },
   methods: {
     extendProjectData(pano) {
       let formated = {

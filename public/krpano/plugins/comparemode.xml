@@ -1,8 +1,8 @@
 ﻿<krpano>
 
-  <plugin name="slider_bg" url="%VIEWER%/krpano/plugins/slider_background.png" keep="true" visible="false" onloaded="set_css_id('sliderPanoCompare');" align="bottom" x="0" y="85" handcursor="false" zorder="1" />
+  <plugin name="slider_bg" url="/krpano/plugins/slider_background.png" keep="true" visible="false" onloaded="set_css_id('sliderPanoCompare');" align="bottom" x="0" y="85" handcursor="false" zorder="1" />
 
-  <plugin name="slider_grip" url="%VIEWER%/krpano/plugins/slider_grip.png" keep="true"  align="left" edge="center" parent="slider_bg" x="0" zorder="2"
+  <plugin name="slider_grip" url="/krpano/plugins/slider_grip.png" keep="true"  align="left" edge="center" parent="slider_bg" x="0" zorder="2"
       dragging="if(pressed, 
 						  sub(dx, mouse.stagex, drag_stagex); 
 						  add(newx, drag_currentx, dx); 

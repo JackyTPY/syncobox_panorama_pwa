@@ -1,5 +1,5 @@
 <krpano>
-    <plugin name="gyro" devices="html5" url="%VIEWER%/krpano/plugins/gyro2.js" enabled="false" onavailable="gyro_available_info();" onunavailable="gyro_not_available_info();" softstart="1" />
+    <plugin name="gyro" devices="html5" url="/krpano/plugins/gyro2.js" enabled="false" onavailable="gyro_available_info();" onunavailable="gyro_not_available_info();" softstart="1" />
 
     <action name="gyro_available_info">
                     set(layer[infotext].html, 'Gyroscope available, press the gyro button...');
