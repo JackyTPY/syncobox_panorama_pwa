@@ -8,13 +8,13 @@ const identityServer = {
 
 const deployServer = {
     localDev: "http://localhost:9002/",
-    dev: "https://portal-dev.syncobox.com/",
+    dev: "https://pano-dev.syncobox.com/",
     prd: "https://portal.syncobox.com/"
 };
 
 //default as production mode
 // let redirect_uri = deployServer["prd"],
-let redirect_uri = deployServer["localDev"], // for static 
+let redirect_uri = deployServer["localDev"], 
     authority_uri = identityServer["prd"];
 
 // if (nodeVariable.isLocalDev) {

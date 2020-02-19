@@ -25,7 +25,9 @@ export default {
       default: () => false
     }
   },
-
+  data: () => ({
+    changeSceneTimes: 0
+  }),
   beforeCreate() {
     window.Event = new (class {
       constructor() {
@@ -98,6 +100,7 @@ export default {
         })
         .then(res => {
           this.project.scene = res;
+          ++this.changeSceneTimes
         })
         .then(res => {
           this.initPano();
@@ -280,20 +283,24 @@ export default {
       if (!map) {
         return;
       }
-      global.krpano.call("addlayer(map);");
-      global.krpano.set(
+      await global.krpano.call("addlayer(map)");
+      await global.krpano.set(
         "layer[map].url",
         `${this.API.map_url.getImage}/${map.id}`
       );
-      global.krpano.set("layer[map].keep", true);
-      global.krpano.set("layer[map].handcursor", false);
-      global.krpano.set("layer[map].capture", false);
-      global.krpano.set("layer[map].align", "leftbottom");
-      global.krpano.set("layer[map].scale", 0.25);
-      global.krpano.set("layer[map].scalechildren", true);
-      global.krpano.set("layer[map].onclick", "openmap();");
-      global.krpano.set("layer[map].visible", true);
-      global.krpano.set("layer[map].onloaded", "skyLentern(mapOnloaded);");
+      await global.krpano.set("layer[map].keep", true);
+      await global.krpano.set("layer[map].handcursor", false);
+      await global.krpano.set("layer[map].capture", false);
+      await global.krpano.set("layer[map].align", "leftbottom");
+      await global.krpano.set("layer[map].scale", 0.25);
+      await global.krpano.set("layer[map].scalechildren", true);
+      await global.krpano.set("layer[map].onclick", "openmap();");
+      await global.krpano.set("layer[map].visible", true);
+      await global.krpano.set("layer[map].onloaded", "skyLentern(mapOnloaded);");
+      if(global.krpano.get('layer[map]')){
+        this.loadMapHotspots()
+      }
+      
     },
 
     async loadMapHotspots() {
@@ -361,6 +368,7 @@ export default {
         global.krpano.set(`layer[${name}].align`, "lefttop");
         global.krpano.set(`layer[${name}].edge`, "center");
         global.krpano.set(`layer[${name}].zorder`, 1);
+        global.krpano.set(`layer[${name}].visible`, true);
         global.krpano.set(`layer[${name}].keep`, true);
         global.krpano.set(`layer[${name}].tooltip`, h.linkPanorama.name);
         global.krpano.call(`layer[${name}].loadstyle(mapTooltip));`);
@@ -368,7 +376,7 @@ export default {
         global.krpano.set(`layer[${name}].y`, h.y * height);
         global.krpano.set(
           `layer[${name}].onclick`,
-          `skyLentern(nextScene, ${h.linkPanorama.id})`
+          `mapspot_loadscene(); skyLentern(nextScene, ${h.linkPanorama.id});`
         );
       });
 
