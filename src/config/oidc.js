@@ -13,16 +13,17 @@ const deployServer = {
 };
 
 //default as production mode
-let redirect_uri = deployServer["prd"],
+// let redirect_uri = deployServer["prd"],
+let redirect_uri = deployServer["localDev"], // for static 
     authority_uri = identityServer["prd"];
 
-if (nodeVariable.isLocalDev) {
-    redirect_uri = deployServer["localDev"];
-    authority_uri = identityServer["prd"];
-} else if (nodeVariable.isDev) {
-    redirect_uri = deployServer["dev"];
-    authority_uri = identityServer["dev"];
-}
+// if (nodeVariable.isLocalDev) {
+//     redirect_uri = deployServer["localDev"];
+//     authority_uri = identityServer["prd"];
+// } else if (nodeVariable.isDev) {
+//     redirect_uri = deployServer["dev"];
+//     authority_uri = identityServer["dev"];
+// }
 
 export const oidcSettings = {
     authority: authority_uri,

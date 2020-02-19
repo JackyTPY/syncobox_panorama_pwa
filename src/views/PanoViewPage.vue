@@ -6,8 +6,26 @@
 <script>
 // @ is an alias to /src
 import vue from "vue";
+import store from "@/store";
 import KrpanoViewer from "@/components/KrpanoViewer.vue";
 import { API } from "../api.js";
+import { register } from "register-service-worker";
+
+function sendMessage(message) {
+  return new Promise(function(resolve, reject) {
+    var messageChannel = new MessageChannel();
+    messageChannel.port1.onmessage = function(event) {
+      if (event.data.error) {
+        reject(event.data.error);
+      } else {
+        resolve(event.data);
+      }
+    };
+    navigator.serviceWorker.controller.postMessage(message, [
+      messageChannel.port2
+    ]);
+  });
+}
 
 export default {
   name: "viewer",
@@ -23,31 +41,81 @@ export default {
   data() {
     return {
       project: null,
-      projectLoaded: false
+      projectLoaded: false,
+      swOnLoad: false
     };
   },
-  async created() {
+  beforeCreate() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js");
+    }
+  },
+  mounted() {
     if (!this.$route.params.id) {
       return;
     }
 
-    await this.API.pano
+    this.API.pano
       .get(this.$route.params.id)
       .then(res => {
         this.project = this.extendProjectData(res.data);
       })
       .then(res => {
-        this.define_manifest();
-      })
-      .then(res => {
         this.projectLoaded = true;
       })
+      .then(() => this.cleanLocalStorage())
+      .then(() => this.define_manifest())
       .catch(err => {
         console.log(err);
       });
-    // this.set_manifest(project.manifest);
+
+    var timeoutID = window.setInterval(e => {
+      if (navigator.serviceWorker.controller && navigator.onLine) {
+        this.preparePWA();
+        window.clearInterval(timeoutID);
+      }
+    }, 1000);
   },
   methods: {
+    preparePWA() {
+      this.API.pwa
+        .get(this.$route.params.id)
+        .then(res => {
+          this.sendMessage({
+            type: "SET_CONFIG",
+            id: this.$route.params.id,
+            access_token: store.getters.oidcAccessToken,
+            resources: res.data
+          });
+        })
+        .then(e => this.sendMessage({ type: "PRECACHE" }));
+    },
+
+    cleanLocalStorage() {
+      Object.entries(localStorage).forEach(e => {
+        let id = e[0];
+        if (!id.startsWith("oidc.user")) {
+          localStorage.removeItem(id);
+        }
+      });
+    },
+
+    sendMessage(message) {
+      return new Promise(function(resolve, reject) {
+        var messageChannel = new MessageChannel();
+        messageChannel.port1.onmessage = function(event) {
+          if (event.data.error) {
+            reject(event.data.error);
+          } else {
+            resolve(event.data);
+          }
+        };
+        navigator.serviceWorker.controller.postMessage(message, [
+          messageChannel.port2
+        ]);
+      });
+    },
+
     extendProjectData(pano) {
       let formated = {
         plugins: {
@@ -149,7 +217,6 @@ export default {
         json.icons[0].src;
       document.head.querySelector("[rel~=apple-touch-icon]").size =
         json.icons[0].size;
-      // document.head.querySelector("[rel~=apple-touch-startup-image]").href = json.icons[0].src;
     }
   }
 };

@@ -13,8 +13,7 @@ export default {
   mounted() {
     this.oidcSignInCallback()
       .then(redirectPath => {
-        console.log(redirectPath)
-        // this.$router.push(redirectPath);
+        this.$router.push(redirectPath);
       })
       .catch(err => {
         console.error(err);

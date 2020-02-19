@@ -109,9 +109,13 @@ export default {
 
     async initPano() {
       await this.loadPano();
+
       if (this.project.scene.appliedMap) {
         await this.loadMap(this.project.scene.appliedMap);
+      } else {
+        await this.deleteMap();
       }
+
       if (this.project.scene.comparePanorama) {
         await this.addCompare(this.project.scene.comparePanorama.id);
       }
@@ -268,7 +272,11 @@ export default {
       global.krpano.set("plugin[slider_grip].visible", !isVisible);
     },
 
-    loadMap(map) {
+    deleteMap() {
+      global.krpano.call("removelayer(map, true)");
+    },
+
+    async loadMap(map) {
       if (!map) {
         return;
       }
@@ -319,10 +327,7 @@ export default {
       // radar
       global.krpano.call("addlayer(mapradar);");
       global.krpano.set("layer[mapradar].parent", "map");
-      global.krpano.set(
-        "layer[mapradar].url",
-        "/krpano/plugins/radar.js"
-      );
+      global.krpano.set("layer[mapradar].url", "/krpano/plugins/radar.js");
       global.krpano.set("layer[mapradar].align", "lefttop");
       global.krpano.set("layer[mapradar].edge", "center");
       global.krpano.set("layer[mapradar].zorder", 2);
