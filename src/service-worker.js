@@ -1,10 +1,11 @@
 self.__precacheManifest = [].concat(self.__precacheManifest || []);
 
-const cacheName = 'syncobox_panorama'
+var cacheName = 'syncobox_panorama'
 var projectId = null
 var access_token = null
 var resources = null
 var config = null
+var promises = []
 const api_base = "https://api.syncobox.com";
 
 
@@ -24,22 +25,15 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', function (event) {
 
-  // precache static files
-  caches.open(cacheName).then(cache => {
-    self.__precacheManifest.forEach(e => {
-      cache.add(e.url)
-    })
-  })
-    .then(() => self.skipWaiting())
-
   event.waitUntil(self.clients.claim());
 
 });
 
-self.addEventListener('message', (event) => {
+self.addEventListener('message', function (event) {
 
   if (event.data && event.data.type === 'SET_CONFIG') {
     console.log('set config')
+    cacheName = 'syncobox_panorama_' + event.data.id
     projectId = event.data.id
     access_token = event.data.access_token
     resources = event.data.resources
@@ -57,44 +51,55 @@ self.addEventListener('message', (event) => {
 
   if (event.data && event.data.type === 'PRECACHE') {
     console.log('precache')
-    caches.open(cacheName).then(cache => {
 
-      // this page
-      cache.add(`/view/${projectId}`)
+    event.waitUntil(
+      caches.open(cacheName).then(function (cache) {
 
-      // all information about panorama
-      resources.panoramaIds.forEach(id => {
-        fetch(`${api_base}/Panorama/${id}`, config)
-          .then(json => {
-            cache.put(`${api_base}/Panorama/${id}`, json)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_l.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_r.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_u.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_d.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_f.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/pano_b.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/preview.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/thumb.jpg`)
-            cache.add(`${api_base}/Panorama/GetImage/${id}/border_thumb_128.png`)
-          })
-          .catch((err) => {
-            console.log('錯誤:', err);
-          })
+        // static files
+        self.__precacheManifest.forEach(e => {
+          promises.push(cache.add(e.url))
+        })
+
+        // this page
+        promises.push(cache.add(`/view/${projectId}`))
+
+        // all information about panorama
+        resources.panoramaIds.forEach(id => {
+          promises.push(
+            fetch(`${api_base}/Panorama/${id}`, config)
+              .then(json => {
+                cache.put(`${api_base}/Panorama/${id}`, json)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_l.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_r.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_u.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_d.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_f.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/pano_b.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/preview.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/thumb.jpg`)
+                cache.add(`${api_base}/Panorama/GetImage/${id}/border_thumb_128.png`)
+              })
+              .catch((err) => {
+                console.log('錯誤:', err);
+              })
+          )
+        })
+
+        // map images
+        resources.mapIds.forEach(id => {
+          promises.push(
+            fetch(`${api_base}/PanoramaMap/GetImage/${id}`, config)
+              .then(res => {
+                cache.put(`${api_base}/PanoramaMap/GetImage/${id}`, res)
+              })
+          )
+        })
+
+
+        Promise.all(promises).then(e => self.clients.matchAll().then(all => all.map(client => client.postMessage({ type: 'PRECACHE_DONE' }))))
       })
-
-      // map images
-      resources.mapIds.forEach(id => {
-        fetch(`${api_base}/PanoramaMap/GetImage/${id}`, config)
-          .then(res => {
-            cache.put(`${api_base}/PanoramaMap/GetImage/${id}`, res)
-          })
-      })
-
-    })
-      .then(() => {
-        return self.skipWaiting();
-      })
+    )
+    self.skipWaiting();
 
   }
 });
-

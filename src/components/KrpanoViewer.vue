@@ -25,9 +25,6 @@ export default {
       default: () => false
     }
   },
-  data: () => ({
-    changeSceneTimes: 0
-  }),
   beforeCreate() {
     window.Event = new (class {
       constructor() {
@@ -75,7 +72,7 @@ export default {
 
     async krpano_onready_callback(krpano_interface) {
       global.krpano = krpano_interface;
-
+      this.$forceUpdate();
       await this.initPano();
     },
 
@@ -100,7 +97,6 @@ export default {
         })
         .then(res => {
           this.project.scene = res;
-          ++this.changeSceneTimes
         })
         .then(res => {
           this.initPano();

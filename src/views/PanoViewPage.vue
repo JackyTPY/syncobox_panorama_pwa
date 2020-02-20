@@ -42,13 +42,19 @@ export default {
     return {
       project: null,
       projectLoaded: false,
-      swOnLoad: false
+      preCacheDone: false
     };
   },
   beforeCreate() {
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/service-worker.js");
+      navigator.serviceWorker.register("/service-worker.js");
     }
+    navigator.serviceWorker.addEventListener("message", m => {
+      console.log(m);
+      if (m.data.type === "PRECACHE_DONE") {
+        this.preCacheDone = true;
+      }
+    });
   },
   mounted() {
     if (!this.$route.params.id) {
@@ -74,7 +80,7 @@ export default {
         this.preparePWA();
         window.clearInterval(timeoutID);
       }
-    }, 1000);
+    }, 500);
   },
   methods: {
     preparePWA() {
@@ -217,6 +223,13 @@ export default {
         json.icons[0].src;
       document.head.querySelector("[rel~=apple-touch-icon]").size =
         json.icons[0].size;
+    }
+  },
+  watch: {
+    preCacheDone: function(done) {
+      console.log("precachedone", done);
+      global.krpano.set("layer[skin_btn_sync].visible", !done);
+      global.krpano.set("layer[skin_btn_syncdone].visible", done);
     }
   }
 };
