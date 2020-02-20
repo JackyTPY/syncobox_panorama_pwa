@@ -239,7 +239,7 @@ export default {
                   onup="skyLentern(hotspotDrag,${h.panoramaId});"
                   onclick="looktohotspot(panohotspot-${
                     h.panoramaId
-                  },get(view.fovmin),smooth(100,-100,120),true); onclick2();"
+                  }); onclick2();"
                   onclick2="skyLentern(nextScene, ${h.panoramaId})"
                   />`;
       });
