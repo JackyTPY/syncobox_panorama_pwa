@@ -93,6 +93,12 @@ export default {
             access_token: store.getters.oidcAccessToken,
             resources: res.data
           });
+          console.log({
+            type: "SET_CONFIG",
+            id: this.$route.params.id,
+            access_token: store.getters.oidcAccessToken,
+            resources: res.data
+          })
         })
         .then(e => this.sendMessage({ type: "PRECACHE" }));
     },

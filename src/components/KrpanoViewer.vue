@@ -289,6 +289,7 @@ export default {
       await global.krpano.set("layer[map].capture", false);
       await global.krpano.set("layer[map].align", "leftbottom");
       await global.krpano.set("layer[map].scale", 0.25);
+      await global.krpano.set("layer[map].alpha", 1.0);
       await global.krpano.set("layer[map].scalechildren", true);
       await global.krpano.set("layer[map].onclick", "openmap();");
       await global.krpano.set("layer[map].visible", true);
