@@ -45,7 +45,7 @@ export default {
       preCacheDone: false
     };
   },
-  beforeCreate() {
+  created() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js");
     }
@@ -53,6 +53,7 @@ export default {
       console.log(m);
       if (m.data.type === "PRECACHE_DONE") {
         this.preCacheDone = true;
+        this.$forceUpdate()
       }
     });
   },
