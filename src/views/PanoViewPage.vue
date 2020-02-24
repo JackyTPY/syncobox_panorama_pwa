@@ -157,7 +157,7 @@ export default {
             purpose: "maskable"
           }
         ],
-        start_url: `https://pano-dev.syncobox.com/view/${this.project.scene.id}/`,
+        start_url: `https://pano-dev.syncobox.com/view/${this.$route.params.shareCode}`,
         display: "standalone",
         background_color: "#000000"
       };
