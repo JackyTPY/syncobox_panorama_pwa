@@ -317,10 +317,16 @@
 	</action>
 
 	<action name="arrange_custom_btn">
-		if(skin_settings.showpanocompare AND skin_settings.showpanomap, set(layer[skin_btn_panomap].x, 85); set(layer[skin_btn_gyro].x, 125);,
-			!skin_settings.showpanocompare AND skin_settings.showpanomap, set(layer[skin_btn_panomap].x, 45); set(layer[skin_btn_gyro].x, 85);,
-			skin_settings.showpanocompare AND !skin_settings.showpanomap, set(layer[skin_btn_panocompare].x, 45); set(layer[skin_btn_gyro].x, 85);,
-			set(layer[skin_btn_gyro].x, 45);
+		if(skin_settings.showpanocompare AND skin_settings.showpanomap, tween(layer[skin_btn_panomap].x, 85); tween(layer[skin_btn_gyro].x, 125); switchVisible(layer[skin_btn_panocompare], true); switchVisible(layer[skin_btn_panomap], true);,
+			!skin_settings.showpanocompare AND skin_settings.showpanomap, tween(layer[skin_btn_panomap].x, 45); tween(layer[skin_btn_gyro].x, 85); switchVisible(layer[skin_btn_panocompare], false); switchVisible(layer[skin_btn_panomap], true);,
+			skin_settings.showpanocompare AND !skin_settings.showpanomap, tween(layer[skin_btn_panocompare].x, 45); tween(layer[skin_btn_gyro].x, 85); switchVisible(layer[skin_btn_panocompare], true); switchVisible(layer[skin_btn_panomap], false);,
+			tween(layer[skin_btn_gyro].x, 45); switchVisible(layer[skin_btn_panocompare], false); switchVisible(layer[skin_btn_panomap], false);
+		)
+	</action>
+
+	<action name="switchVisible">
+		if(%2, set(%1.visible, %2); tween(%1.alpha, 1.0);,
+			tween(%1.alpha, 0.0); set(%1.visible, %2); 
 		)
 	</action>
 

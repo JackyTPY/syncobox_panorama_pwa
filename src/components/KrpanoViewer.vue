@@ -478,18 +478,10 @@ export default {
       this.setTooltip("btnPanoToolSyncDone", this.$t('cached'));
     },
 
-    async arrangeCustomToolItems(){
+    arrangeCustomToolItems(){
       if(!global.krpano){
-        return;
+        global.krpano.call('arrange_custom_btn();')
       }
-
-      let hasMap = this.project.scene.appliedMap ? true : false
-      let hasCompare = this.project.scene.comparePanorama ? true : false
-
-      await global.krpano.set('layer[skin_btn_panomap].visible', hasMap)
-      await global.krpano.set('layer[skin_btn_panocompare].visible', hasCompare)
-
-      await global.krpano.call('arrange_custom_btn();')
     },
 
     mobileAndTabletcheck() {
