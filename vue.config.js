@@ -6,5 +6,14 @@ module.exports = {
     workboxOptions: {
       swSrc: 'src/service-worker.js'
     }
+  },
+
+  pluginOptions: {
+    i18n: {
+      locale: 'zh-TW',
+      fallbackLocale: 'en',
+      localeDir: 'locales',
+      enableInSFC: true
+    }
   }
 }

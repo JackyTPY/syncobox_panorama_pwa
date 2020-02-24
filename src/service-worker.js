@@ -2,24 +2,47 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 
 var cacheName = 'syncobox_panorama'
 var projectId = null
-var access_token = null
+var access_token = 'eyJhbGciOiJSUzI1NiIsImtpZCI6Il9QSm5NVVNxZ3hWSDJXN2I5VElES2ciLCJ0eXAiOiJhdCtqd3QifQ.eyJuYmYiOjE1ODI1MTE4MjksImV4cCI6MTU4MjUxNTQyOSwiaXNzIjoiaHR0cHM6Ly9pZGVudGl0eS5zeW5jb2JveC5jb20iLCJhdWQiOiJwYW5vOmFsbCIsImNsaWVudF9pZCI6InBvcnRhbC1zcGEiLCJzdWIiOiI4ZmUzODAxNy1hZmExLTQzOWItOGI3OS1kNmIxMTM0ZGIzNDkiLCJhdXRoX3RpbWUiOjE1ODI1MTE4MDQsImlkcCI6ImxvY2FsIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiamFja3l0c2VuZ0B3ZWJpbS5jb20udHciLCJ1bmlxdWVfbmFtZSI6ImphY2t5dHNlbmdAd2ViaW0uY29tLnR3IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiI4ZmUzODAxNy1hZmExLTQzOWItOGI3OS1kNmIxMTM0ZGIzNDkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiamFja3l0c2VuZ0B3ZWJpbS5jb20udHciLCJlbWFpbCI6ImphY2t5dHNlbmdAd2ViaW0uY29tLnR3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImphY2t5dHNlbmdAd2ViaW0uY29tLnR3Iiwic2NvcGUiOlsicHJvZmlsZSIsIm9wZW5pZCIsInBhbm86YWxsIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.eaG5I1db2pNAtNMOZzm6svJRkrK51xQSGSaRDYUeE1HglLJrXyq-SlUZz4qzLbshK7lIWfN8VIhVTFfm3GTzzA_4-smO4ezOQqnydFcZKurEmujB0LXYfArxqwqEcacJZ-J80yXE-_CC0QmbWCPJ8eTSOw0EEcos8fWjpOZibCadU0kMlmOzt-0WRokhhv1ya74y7YHWTFnR0GrFx6TxraGHfayOcJWrt3AhtQeXFyCiF-oOJ3VwWWZ_eV8Asp31IvnwhCHWbmjZsSQdRkFs63tiQQqaKhlMjO_T8BqcOBDmygKBemoGroX-9bGSazLhTyXxs4RcJRdb8KkvoQtYSQ'
 var resources = null
-var config = null
+var config = {
+  headers: {
+    Authorization: `bearer ${access_token}`,
+    "Access-Control-Allow-Origin": "*"
+  }
+}
 var promises = []
 const api_base = "https://api.syncobox.com";
 
 
 self.addEventListener('fetch', function (event) {
-  if (!navigator.onLine) {
-    event.respondWith(
-      caches.match(event.request.url).then(res => {
-        return res
-      })
-    );
-  }
+
+  event.respondWith(
+    caches.match(event.request.url).then(res => {
+      return res || fetch(event.request)
+        .then(r => {
+          return caches.open(cacheName).then(cache => {
+            cache.put(event.request.url, r.clone());
+            return r;
+          });
+        })
+    })
+  );
+
 });
 
 self.addEventListener('install', event => {
+  projectId = new URL(location).searchParams.get('id');
+
+  console.log('service worker: ', projectId)
+  // static files
+  caches.open(cacheName).then(cache => {
+    self.__precacheManifest.forEach(e => {
+      promises.push(cache.add(e.url))
+    })
+  })
+
+  
+
   self.skipWaiting()
 })
 
@@ -37,12 +60,6 @@ self.addEventListener('message', function (event) {
     projectId = event.data.id
     access_token = event.data.access_token
     resources = event.data.resources
-    config = {
-      headers: {
-        Authorization: `bearer ${access_token}`,
-        "Access-Control-Allow-Origin": "*"
-      }
-    }
   }
 
   if (event.data && event.data.type === 'CLEAN_CACHE') {
@@ -55,13 +72,8 @@ self.addEventListener('message', function (event) {
     event.waitUntil(
       caches.open(cacheName).then(function (cache) {
 
-        // static files
-        self.__precacheManifest.forEach(e => {
-          promises.push(cache.add(e.url))
-        })
-
-        // this page
-        promises.push(cache.add(`/view/${projectId}`))
+        // // this page
+        // promises.push(cache.add(`/view/${projectId}`))
 
         // all information about panorama
         resources.panoramaIds.forEach(id => {

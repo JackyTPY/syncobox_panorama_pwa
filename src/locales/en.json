@@ -1,0 +1,13 @@
+{
+  "back_to_list": "back",
+  "map": "map",
+  "compare_mode": "compare",
+  "setting": "setting",
+  "fullscreen": "fullscreen",
+  "gyro_mode": "gyro",
+  "vr_mode": "VR",
+  "hide": "hide",
+  "show": "show",
+  "caching": "caching",
+  "cached": "cached"
+}

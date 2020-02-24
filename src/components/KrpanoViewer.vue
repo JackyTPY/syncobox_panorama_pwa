@@ -25,6 +25,10 @@ export default {
       default: () => false
     }
   },
+  data: () => ({
+    intervalID: null,
+    currentAlpha: 0
+  }),
   beforeCreate() {
     window.Event = new (class {
       constructor() {
@@ -46,11 +50,12 @@ export default {
     Event.listen("goHome", () => {
       this.isPreview ? "" : this.$router.go(-1);
     });
+    Event.listen("skinOnLoad", this.setToolbarTips);
+    document.addEventListener("keydown", this.controllerDetect);
   },
 
   mounted() {
     this.init();
-    this.$forceUpdate();
   },
 
   methods: {
@@ -72,7 +77,6 @@ export default {
 
     async krpano_onready_callback(krpano_interface) {
       global.krpano = krpano_interface;
-      this.$forceUpdate();
       await this.initPano();
     },
 
@@ -107,16 +111,24 @@ export default {
     },
 
     async initPano() {
+      caches.keys().then(keys => {
+        let preCacheDone = keys.includes(
+          `syncobox_panorama_${this.project.scene.id}`
+        );
+        global.krpano.set("layer[skin_btn_sync].visible", !preCacheDone);
+        global.krpano.set("layer[skin_btn_syncdone].visible", preCacheDone);
+      });
+
       await this.loadPano();
 
       if (this.project.scene.appliedMap) {
-        await this.loadMap(this.project.scene.appliedMap);
+        this.loadMap(this.project.scene.appliedMap);
       } else {
-        await this.deleteMap();
+        this.deleteMap();
       }
 
       if (this.project.scene.comparePanorama) {
-        await this.addCompare(this.project.scene.comparePanorama.id);
+        this.addCompare(this.project.scene.comparePanorama.id);
       }
     },
 
@@ -173,8 +185,10 @@ export default {
               }
               <skin_settings 
                 layout_maxwidth="${this.project.skin_settings.layout_maxwidth}"
-                showpanomap="${this.project.skin_settings.showpanomap}"
-                showpanocompare="${this.project.skin_settings.showpanocompare}"
+                showpanomap="${this.project.scene.appliedMap ? true : false}"
+                showpanocompare="${
+                  this.project.scene.comparePanorama ? true : false
+                }"
                 webvr="${this.project.skin_settings.webvr}"
                 showsetting="${this.project.skin_settings.showsetting}"
                 showhome="${false}"
@@ -279,6 +293,7 @@ export default {
       if (!map) {
         return;
       }
+
       await global.krpano.call("addlayer(map)");
       await global.krpano.set(
         "layer[map].url",
@@ -292,12 +307,18 @@ export default {
       await global.krpano.set("layer[map].alpha", 1.0);
       await global.krpano.set("layer[map].scalechildren", true);
       await global.krpano.set("layer[map].onclick", "openmap();");
-      await global.krpano.set("layer[map].visible", !this.mobileAndTabletcheck());
-      await global.krpano.set("layer[map].onloaded", "skyLentern(mapOnloaded);");
-      if(global.krpano.get('layer[map]')){
-        this.loadMapHotspots()
+      await global.krpano.set(
+        "layer[map].visible",
+        !this.mobileAndTabletcheck()
+      );
+      await global.krpano.set(
+        "layer[map].onloaded",
+        "skyLentern(mapOnloaded);"
+      );
+
+      if (global.krpano.get("layer[map]")) {
+        this.loadMapHotspots();
       }
-      
     },
 
     async loadMapHotspots() {
@@ -390,11 +411,129 @@ export default {
       global.krpano.set("layer[map].visible", !isVisible);
     },
 
+    controllerDetect(e) {
+      console.log(e);
+
+      switch (e.keyCode) {
+        // 向左
+        case 37:
+          this.intervalID = setInterval(() => {
+            this.fade("in");
+          }, 10);
+          break;
+
+        // 左 到 中間
+        case 81:
+          clearInterval(this.intervalID);
+          break;
+
+        // 向右
+        case 39:
+          this.intervalID = setInterval(() => {
+            this.fade("out");
+          }, 10);
+          break;
+
+        // 右 到 中間
+        case 67:
+          clearInterval(this.intervalID);
+          break;
+      }
+    },
+
+    fade(direct) {
+      var moveUnit = 0.01;
+      var newAlpha;
+
+      if (direct === "in") {
+        newAlpha = new Number(this.currentAlpha) - new Number(moveUnit);
+        this.currentAlpha = newAlpha >= 0 ? newAlpha : 0;
+        krpano.call(`setblend(${this.currentAlpha};`);
+      }
+
+      if (direct === "out") {
+        newAlpha = new Number(this.currentAlpha) + new Number(moveUnit);
+        this.currentAlpha = newAlpha <= 1 ? newAlpha : 1;
+        krpano.call(`setblend(${this.currentAlpha};`);
+      }
+    },
+
+    setTooltip(id, text) {
+      document.getElementById(id).classList.add('tooltip')
+      document.getElementById(id).innerHTML = `<span class="tooltiptext">${text}</span>`
+    },
+
+    setToolbarTips() {
+      this.setTooltip("btnPanoToolHome", this.$t('back_to_list'));
+      this.setTooltip("btnPanoToolPanomap", this.$t('map'));
+      this.setTooltip("btnPanoToolPanocompare", this.$t('compare_mode'));
+      this.setTooltip("btnPanoToolSetting", this.$t('setting'));
+      this.setTooltip("btnPanoToolFullscreen", this.$t('fullscreen'));
+      this.setTooltip("btnPanoToolGyro", this.$t('gyro_mode'));
+      this.setTooltip("btnPanoToolVR", this.$t('vr_mode'));
+      this.setTooltip("btnPanoToolHide", this.$t('hide'));
+      this.setTooltip("btnPanoToolShow", this.$t('show'));
+      this.setTooltip("btnPanoToolSync", this.$t('caching'));
+      this.setTooltip("btnPanoToolSyncDone", this.$t('cached'));
+    },
+
     mobileAndTabletcheck() {
       var check = false;
-      (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
+      (function(a) {
+        if (
+          /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(
+            a
+          ) ||
+          /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+            a.substr(0, 4)
+          )
+        )
+          check = true;
+      })(navigator.userAgent || navigator.vendor || window.opera);
       return check;
     }
   }
 };
 </script>
+
+<style lang="scss">
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  display: inline-block;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 6px 0;
+  border-radius: 6px;
+  width: 72px;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  text-transform: capitalize;
+
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* 提示工具底部 */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+</style>

@@ -6,7 +6,6 @@
 <script>
 // @ is an alias to /src
 import vue from "vue";
-import store from "@/store";
 import KrpanoViewer from "@/components/KrpanoViewer.vue";
 import { API } from "../api.js";
 import { register } from "register-service-worker";
@@ -47,13 +46,12 @@ export default {
   },
   created() {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/service-worker.js");
+      navigator.serviceWorker.register(`/service-worker.js?id=${encodeURIComponent(this.$route.params.id)}`);
     }
     navigator.serviceWorker.addEventListener("message", m => {
       console.log(m);
       if (m.data.type === "PRECACHE_DONE") {
         this.preCacheDone = true;
-        this.$forceUpdate()
       }
     });
   },
@@ -76,12 +74,12 @@ export default {
         console.log(err);
       });
 
-    var timeoutID = window.setInterval(e => {
-      if (navigator.serviceWorker.controller && navigator.onLine) {
-        this.preparePWA();
-        window.clearInterval(timeoutID);
-      }
-    }, 500);
+    // var timeoutID = window.setInterval(e => {
+    //   if (navigator.serviceWorker.controller && navigator.onLine) {
+    //     this.preparePWA();
+    //     clearInterval(timeoutID);
+    //   }
+    // }, 100);
   },
   methods: {
     preparePWA() {
@@ -91,15 +89,8 @@ export default {
           this.sendMessage({
             type: "SET_CONFIG",
             id: this.$route.params.id,
-            access_token: store.getters.oidcAccessToken,
             resources: res.data
           });
-          console.log({
-            type: "SET_CONFIG",
-            id: this.$route.params.id,
-            access_token: store.getters.oidcAccessToken,
-            resources: res.data
-          })
         })
         .then(e => this.sendMessage({ type: "PRECACHE" }));
     },
@@ -175,31 +166,31 @@ export default {
         theme_color: "#4DBA87",
         icons: [
           {
-            src: "http://localhost:9002/img/icons/android-chrome-192x192.png",
+            src: "https://pano-dev.syncobox.com/img/icons/android-chrome-192x192.png",
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src: "http://localhost:9002/img/icons/android-chrome-512x512.png",
+            src: "https://pano-dev.syncobox.com/img/icons/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png"
           },
           {
             src:
-              "http://localhost:9002/img/icons/android-chrome-maskable-192x192.png",
+              "https://pano-dev.syncobox.com/img/icons/android-chrome-maskable-192x192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "maskable"
           },
           {
             src:
-              "http://localhost:9002/img/icons/android-chrome-maskable-512x512.png",
+              "https://pano-dev.syncobox.com/img/icons/android-chrome-maskable-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable"
           }
         ],
-        start_url: `http://localhost:9002/#/Panorama/view/${this.project.scene.id}/`,
+        start_url: `https://pano-dev.syncobox.com/view/${this.project.scene.id}/`,
         display: "standalone",
         background_color: "#000000"
       };
@@ -217,26 +208,27 @@ export default {
         .querySelector("[rel~=manifest]")
         .setAttribute("href", manifestURL);
 
+      // for apple
       document.head.querySelector(
         "[name~=apple-mobile-web-app-title]"
       ).content = json.name;
       document.head.querySelector(
-        "[name~=apple-mobile-web-app-status-bar-style]"
-      ).content = json.background_color;
+        "[rel~=apple-touch-icon]"
+      ).href = `${this.API.pano_url.getImage}/${this.project.scene.id}/thumb.jpg`;
+
+      // for ms
       document.head.querySelector(
-        "[name~=apple-mobile-web-app-capable]"
-      ).content = "yes";
-      document.head.querySelector("[rel~=apple-touch-icon]").href =
-        json.icons[0].src;
-      document.head.querySelector("[rel~=apple-touch-icon]").size =
-        json.icons[0].size;
+        "[name~=msapplication-TileImage]"
+      ).content = `${this.API.pano_url.getImage}/${this.project.scene.id}/thumb.jpg`;
     }
   },
   watch: {
     preCacheDone: function(done) {
       console.log("precachedone", done);
-      global.krpano.set("layer[skin_btn_sync].visible", !done);
-      global.krpano.set("layer[skin_btn_syncdone].visible", done);
+      if(global.krpano){
+        global.krpano.set("layer[skin_btn_sync].visible", !done);
+        global.krpano.set("layer[skin_btn_syncdone].visible", done);
+      }
     }
   }
 };
