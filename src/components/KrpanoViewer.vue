@@ -51,7 +51,9 @@ export default {
       this.isPreview ? "" : this.$router.go(-1);
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
-    document.addEventListener("keydown", this.controllerDetect);
+
+    if(this.mobileAndTabletcheck())
+      document.addEventListener("keydown", this.controllerDetect);
   },
 
   mounted() {
@@ -113,7 +115,7 @@ export default {
     async initPano() {
       caches.keys().then(keys => {
         let preCacheDone = keys.includes(
-          `syncobox_panorama_${this.project.scene.id}`
+          `syncobox_panorama_${this.project.scene.shareCode}`
         );
         global.krpano.set("layer[skin_btn_sync].visible", !preCacheDone);
         global.krpano.set("layer[skin_btn_syncdone].visible", preCacheDone);
@@ -193,6 +195,7 @@ export default {
                 webvr="${this.project.skin_settings.webvr}"
                 showsetting="${this.project.skin_settings.showsetting}"
                 showhome="${false}"
+                enableOffline="${this.project.skin_settings.enableOffline}"
               />
               <events name="viewListener" keep="true" onviewchange="skyLentern(viewChange)" />
               <scene 

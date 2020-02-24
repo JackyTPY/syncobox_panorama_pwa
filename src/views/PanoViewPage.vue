@@ -10,22 +10,6 @@ import KrpanoViewer from "@/components/KrpanoViewer.vue";
 import { API } from "../api.js";
 import { register } from "register-service-worker";
 
-function sendMessage(message) {
-  return new Promise(function(resolve, reject) {
-    var messageChannel = new MessageChannel();
-    messageChannel.port1.onmessage = function(event) {
-      if (event.data.error) {
-        reject(event.data.error);
-      } else {
-        resolve(event.data);
-      }
-    };
-    navigator.serviceWorker.controller.postMessage(message, [
-      messageChannel.port2
-    ]);
-  });
-}
-
 export default {
   name: "viewer",
   components: {
@@ -46,8 +30,9 @@ export default {
   },
   created() {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register(`/service-worker.js?id=${encodeURIComponent(this.$route.params.id)}`);
+      navigator.serviceWorker.register(`/service-worker.js?shareCode=${encodeURIComponent(this.$route.params.shareCode)}`);
     }
+
     navigator.serviceWorker.addEventListener("message", m => {
       console.log(m);
       if (m.data.type === "PRECACHE_DONE") {
@@ -56,14 +41,14 @@ export default {
     });
   },
   mounted() {
-    if (!this.$route.params.id) {
+    if (!this.$route.params.shareCode) {
       return;
     }
 
-    this.API.pano
-      .get(this.$route.params.id)
+    this.API.pwa
+      .get(this.$route.params.shareCode)
       .then(res => {
-        this.project = this.extendProjectData(res.data);
+        this.project = this.extendProjectData(res.data.initialPanorama);
       })
       .then(res => {
         this.projectLoaded = true;
@@ -73,27 +58,8 @@ export default {
       .catch(err => {
         console.log(err);
       });
-
-    // var timeoutID = window.setInterval(e => {
-    //   if (navigator.serviceWorker.controller && navigator.onLine) {
-    //     this.preparePWA();
-    //     clearInterval(timeoutID);
-    //   }
-    // }, 100);
   },
   methods: {
-    preparePWA() {
-      this.API.pwa
-        .get(this.$route.params.id)
-        .then(res => {
-          this.sendMessage({
-            type: "SET_CONFIG",
-            id: this.$route.params.id,
-            resources: res.data
-          });
-        })
-        .then(e => this.sendMessage({ type: "PRECACHE" }));
-    },
 
     cleanLocalStorage() {
       Object.entries(localStorage).forEach(e => {
@@ -138,7 +104,8 @@ export default {
           showpanomap: true,
           showpanocompare: true,
           webvr: true,
-          showsetting: false
+          showsetting: false,
+          enableOffline: true
         },
         scene: {
           ...pano,
