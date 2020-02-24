@@ -317,9 +317,10 @@
 	</action>
 
 	<action name="arrange_custom_btn">
-		if(!skin_settings.showpanocompare AND !skin_settings.showpanomap, set(layer[skin_btn_gyro].x, 45);,
-			!skin_settings.showpanocompare, set(layer[skin_btn_panomap].x, 45); set(layer[skin_btn_gyro].x, 85);,
-			!skin_settings.showpanomap, set(layer[skin_btn_panocompare].x, 45); set(layer[skin_btn_gyro].x, 85);
+		if(skin_settings.showpanocompare AND skin_settings.showpanomap, set(layer[skin_btn_panomap].x, 85); set(layer[skin_btn_gyro].x, 125);,
+			!skin_settings.showpanocompare AND skin_settings.showpanomap, set(layer[skin_btn_panomap].x, 45); set(layer[skin_btn_gyro].x, 85);,
+			skin_settings.showpanocompare AND !skin_settings.showpanomap, set(layer[skin_btn_panocompare].x, 45); set(layer[skin_btn_gyro].x, 85);,
+			set(layer[skin_btn_gyro].x, 45);
 		)
 	</action>
 

@@ -120,6 +120,7 @@ export default {
       });
 
       await this.loadPano();
+      await this.arrangeCustomToolItems();
 
       if (this.project.scene.appliedMap) {
         this.loadMap(this.project.scene.appliedMap);
@@ -477,6 +478,20 @@ export default {
       this.setTooltip("btnPanoToolSyncDone", this.$t('cached'));
     },
 
+    async arrangeCustomToolItems(){
+      if(!global.krpano){
+        return;
+      }
+
+      let hasMap = this.project.scene.appliedMap ? true : false
+      let hasCompare = this.project.scene.comparePanorama ? true : false
+
+      await global.krpano.set('layer[skin_btn_panomap].visible', hasMap)
+      await global.krpano.set('layer[skin_btn_panocompare].visible', hasCompare)
+
+      await global.krpano.call('arrange_custom_btn();')
+    },
+
     mobileAndTabletcheck() {
       var check = false;
       (function(a) {
@@ -505,13 +520,12 @@ export default {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  display: inline-block;
   background-color: black;
   color: #fff;
   text-align: center;
   padding: 6px 0;
   border-radius: 6px;
-  width: 72px;
+  width: 80px;
   bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
