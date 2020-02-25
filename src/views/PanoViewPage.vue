@@ -1,5 +1,5 @@
 <template>
-  <KrpanoViewer :project="project" :API="API" v-if="projectLoaded" />
+  <KrpanoViewer :project.sync="project" :API="API" v-if="projectLoaded" />
 </template>
 
 
@@ -28,17 +28,37 @@ export default {
       preCacheDone: false
     };
   },
-  created() {
+  async created() {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register(`/service-worker.js?shareCode=${encodeURIComponent(this.$route.params.shareCode)}`);
+      await navigator.serviceWorker
+        .getRegistrations()
+        .then(async function(registrations) {
+          for (let registration of registrations) {
+            await registration.unregister();
+          }
+        });
+      await navigator.serviceWorker.register(
+        `/service-worker.js?shareCode=${encodeURIComponent(
+          this.$route.params.shareCode
+        )}`
+      );
     }
 
-    navigator.serviceWorker.addEventListener("message", m => {
-      console.log(m);
-      if (m.data.type === "PRECACHE_DONE") {
-        this.preCacheDone = true;
-      }
-    });
+    caches
+      .has(`syncobox_panorama_${this.$route.params.shareCode}`)
+      .then(has => {
+        if (has) {
+          this.preCacheDone = true;
+          console.log("has cached");
+        } else {
+          navigator.serviceWorker.addEventListener("message", m => {
+            console.log(m);
+            if (m.data.type === "PRECACHE_DONE") {
+              this.preCacheDone = true;
+            }
+          });
+        }
+      });
   },
   mounted() {
     if (!this.$route.params.shareCode) {
@@ -53,38 +73,15 @@ export default {
       .then(res => {
         this.projectLoaded = true;
       })
-      .then(() => this.cleanLocalStorage())
       .then(() => this.define_manifest())
       .catch(err => {
         console.log(err);
       });
   },
+  updated(){
+    this.define_manifest()
+  },
   methods: {
-
-    cleanLocalStorage() {
-      Object.entries(localStorage).forEach(e => {
-        let id = e[0];
-        if (!id.startsWith("oidc.user")) {
-          localStorage.removeItem(id);
-        }
-      });
-    },
-
-    sendMessage(message) {
-      return new Promise(function(resolve, reject) {
-        var messageChannel = new MessageChannel();
-        messageChannel.port1.onmessage = function(event) {
-          if (event.data.error) {
-            reject(event.data.error);
-          } else {
-            resolve(event.data);
-          }
-        };
-        navigator.serviceWorker.controller.postMessage(message, [
-          messageChannel.port2
-        ]);
-      });
-    },
 
     extendProjectData(pano) {
       let formated = {
@@ -105,7 +102,8 @@ export default {
           showpanocompare: true,
           webvr: true,
           showsetting: false,
-          enableOffline: true
+          enableOffline: true,
+          cached: this.preCacheDone,
         },
         scene: {
           ...pano,
@@ -133,12 +131,14 @@ export default {
         theme_color: "#4DBA87",
         icons: [
           {
-            src: "https://pano-dev.syncobox.com/img/icons/android-chrome-192x192.png",
+            src:
+              "https://pano-dev.syncobox.com/img/icons/android-chrome-192x192.png",
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src: "https://pano-dev.syncobox.com/img/icons/android-chrome-512x512.png",
+            src:
+              "https://pano-dev.syncobox.com/img/icons/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png"
           },
@@ -192,10 +192,18 @@ export default {
   watch: {
     preCacheDone: function(done) {
       console.log("precachedone", done);
-      if(global.krpano){
-        global.krpano.set("layer[skin_btn_sync].visible", !done);
-        global.krpano.set("layer[skin_btn_syncdone].visible", done);
-      }
+      let timeoutID = setInterval(async () => {
+        console.log('try to set krpano')
+        if (global.krpano) {
+          // await global.krpano.set("layer[skin_btn_sync].visible", !done);
+          // await global.krpano.set("layer[skin_btn_syncdone].visible", done);
+          this.project.skin_settings.cached = done
+          await global.krpano.set("skin_settings.cached", done);
+          await global.krpano.call("arrange_custom_btn();");
+          console.log('setting krpano')
+          clearInterval(timeoutID);
+        }
+      }, 5000);
     }
   }
 };

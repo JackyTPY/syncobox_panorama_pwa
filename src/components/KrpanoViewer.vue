@@ -23,7 +23,8 @@ export default {
     isPreview: {
       type: Boolean,
       default: () => false
-    }
+    },
+    firstEntry: true
   },
   data: () => ({
     intervalID: null,
@@ -52,7 +53,7 @@ export default {
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
-    if(this.mobileAndTabletcheck())
+    if (this.mobileAndTabletcheck())
       document.addEventListener("keydown", this.controllerDetect);
   },
 
@@ -103,6 +104,7 @@ export default {
         })
         .then(res => {
           this.project.scene = res;
+          this.firstEntry = false
         })
         .then(res => {
           this.initPano();
@@ -113,14 +115,6 @@ export default {
     },
 
     async initPano() {
-      caches.keys().then(keys => {
-        let preCacheDone = keys.includes(
-          `syncobox_panorama_${this.project.scene.shareCode}`
-        );
-        global.krpano.set("layer[skin_btn_sync].visible", !preCacheDone);
-        global.krpano.set("layer[skin_btn_syncdone].visible", preCacheDone);
-      });
-
       await this.loadPano();
       await this.arrangeCustomToolItems();
 
@@ -196,6 +190,7 @@ export default {
                 showsetting="${this.project.skin_settings.showsetting}"
                 showhome="${false}"
                 enableOffline="${this.project.skin_settings.enableOffline}"
+                cached="${this.project.skin_settings.cached}"
               />
               <events name="viewListener" keep="true" onviewchange="skyLentern(viewChange)" />
               <scene 
@@ -463,27 +458,38 @@ export default {
     },
 
     setTooltip(id, text) {
-      document.getElementById(id).classList.add('tooltip')
-      document.getElementById(id).innerHTML = `<span class="tooltiptext">${text}</span>`
+      let target = document.getElementById(id);
+
+      if(target){
+        target.classList.add("tooltip");
+        target.innerHTML = `<span class="tooltiptext">${text}</span>`;
+        return true
+      }
+      
+      return false
     },
 
     setToolbarTips() {
-      this.setTooltip("btnPanoToolHome", this.$t('back_to_list'));
-      this.setTooltip("btnPanoToolPanomap", this.$t('map'));
-      this.setTooltip("btnPanoToolPanocompare", this.$t('compare_mode'));
-      this.setTooltip("btnPanoToolSetting", this.$t('setting'));
-      this.setTooltip("btnPanoToolFullscreen", this.$t('fullscreen'));
-      this.setTooltip("btnPanoToolGyro", this.$t('gyro_mode'));
-      this.setTooltip("btnPanoToolVR", this.$t('vr_mode'));
-      this.setTooltip("btnPanoToolHide", this.$t('hide'));
-      this.setTooltip("btnPanoToolShow", this.$t('show'));
-      this.setTooltip("btnPanoToolSync", this.$t('caching'));
-      this.setTooltip("btnPanoToolSyncDone", this.$t('cached'));
+      let timeoutID = setInterval(() => {
+        if( this.setTooltip("btnPanoToolHome", this.$t("back_to_list")) &&
+        this.setTooltip("btnPanoToolPanomap", this.$t("map")) &&
+        this.setTooltip("btnPanoToolPanocompare", this.$t("compare_mode")) &&
+        this.setTooltip("btnPanoToolSetting", this.$t("setting")) &&
+        this.setTooltip("btnPanoToolFullscreen", this.$t("fullscreen")) &&
+        this.setTooltip("btnPanoToolGyro", this.$t("gyro_mode")) &&
+        this.setTooltip("btnPanoToolVR", this.$t("vr_mode")) &&
+        this.setTooltip("btnPanoToolHide", this.$t("hide")) &&
+        this.setTooltip("btnPanoToolShow", this.$t("show")) &&
+        this.setTooltip("btnPanoToolSync", this.$t("caching")) &&
+        this.setTooltip("btnPanoToolSyncDone", this.$t("cached"))){
+          clearInterval(timeoutID)
+        }
+      }, 500);
     },
 
-    arrangeCustomToolItems(){
-      if(!global.krpano){
-        global.krpano.call('arrange_custom_btn();')
+    arrangeCustomToolItems() {
+      if (!global.krpano) {
+        global.krpano.call("arrange_custom_btn();");
       }
     },
 
@@ -532,14 +538,14 @@ export default {
 }
 
 .tooltip .tooltiptext::after {
-    content: " ";
-    position: absolute;
-    top: 100%; /* 提示工具底部 */
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: black transparent transparent transparent;
+  content: " ";
+  position: absolute;
+  top: 100%; /* 提示工具底部 */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
