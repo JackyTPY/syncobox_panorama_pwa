@@ -49,8 +49,10 @@ export default {
     Event.listen("mapBtnClick", this.showMap);
     Event.listen("mapOnloaded", this.loadMapHotspots);
     Event.listen("nextScene", this.fetchPano);
-    Event.listen("goHome", () => {
-      this.isPreview ? "" : this.$router.go(-1);
+    Event.listen("goHome", async () => {
+      await global.krpano.set('view.hlookat', this.project.scene.view.hlookat)
+      await global.krpano.set('view.vlookat', this.project.scene.view.vlookat)
+      await global.krpano.set('view.fov', this.project.scene.view.fov)
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
@@ -484,7 +486,7 @@ export default {
 
     setToolbarTips() {
       let timeoutID = setInterval(() => {
-        if( this.setTooltip("btnPanoToolHome", this.$t("back_to_list")) &&
+        if( this.setTooltip("btnPanoToolHome", this.$t("default_view")) &&
         this.setTooltip("btnPanoToolPanomap", this.$t("map")) &&
         this.setTooltip("btnPanoToolPanocompare", this.$t("compare_mode")) &&
         this.setTooltip("btnPanoToolSetting", this.$t("setting")) &&
