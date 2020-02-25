@@ -28,7 +28,8 @@ export default {
   },
   data: () => ({
     intervalID: null,
-    currentAlpha: 0
+    currentAlpha: 0,
+    lastView: null
   }),
   beforeCreate() {
     window.Event = new (class {
@@ -83,7 +84,17 @@ export default {
       await this.initPano();
     },
 
-    fetchPano(id) {
+    async fetchPano(id) {
+      
+      let heading = this.project.scene.appliedMap.hotspots.find(x => x.linkPanorama.id === this.project.scene.id).heading;
+      let currentHlookat = await global.krpano.get('view.hlookat')
+      let currentVlookat = await global.krpano.get('view.vlookat')
+      
+      this.lastView = {
+        hlookat: currentHlookat + heading,
+        vlookat: currentVlookat
+      }
+
       this.API.pano
         .get(id)
         .then(res => {
@@ -215,8 +226,10 @@ export default {
         return "";
       }
 
+      let heading = this.project.scene.appliedMap.hotspots.find(x => x.linkPanorama.id === this.project.scene.id).heading;
+
       var xml = ` 
-          <view hlookat="${scene.view.hlookat}" vlookat="${scene.view.vlookat}" fovtype="${scene.view.fovtype}" fov="${scene.view.fov}" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${scene.view.fovmin}" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
+          <view hlookat="${this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat}" vlookat="${this.lastView ? this.lastView.vlookat : scene.view.vlookat}" fovtype="${scene.view.fovtype}" fov="${scene.view.fov}" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${scene.view.fovmin}" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
           <preview url="${this.API.pano_url.getImage}/${scene.id}/preview.jpg" />
           <image>
               <cube url="${this.API.pano_url.getImage}/${scene.id}/pano_%s.jpg" />
