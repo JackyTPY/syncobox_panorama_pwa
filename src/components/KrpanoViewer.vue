@@ -425,10 +425,6 @@ export default {
           `layer[${name}].onclick`,
           `skyLentern(mapHotspotOnClick, ${h.linkPanorama.id});`
         );
-        // global.krpano.set(
-        //   `layer[${name}].onclick`,
-        //   `skyLentern(mapHotspotOnClick, ${h.linkPanorama.id}); skyLentern(nextScene, ${h.linkPanorama.id});`
-        // );
       });
 
       // for radar
@@ -442,8 +438,11 @@ export default {
       if(parseFloat(global.krpano.get('layer[map].scale')) > 0.25){
         await global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
           set(layer[map].enabled, false);
-          skyLentern(nextScene, ${id}););
-        `)
+          skyLentern(nextScene, ${id});
+        );`)
+      }
+      else{
+        await global.krpano.call(`skyLentern(nextScene, ${id});`)
       }
     },
 
