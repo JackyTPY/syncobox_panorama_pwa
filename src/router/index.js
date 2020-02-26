@@ -5,7 +5,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/view/:shareCode",
+    path: "/:shareCode",
     name: "PanoramaViewer",
     component: () =>
         import ( /* webpackChunkName: "about" */ "../views/PanoViewPage.vue")
