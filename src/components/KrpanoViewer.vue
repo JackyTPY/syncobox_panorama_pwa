@@ -48,11 +48,12 @@ export default {
     Event.listen("compareBtnClick", this.showCompareTool);
     Event.listen("mapBtnClick", this.showMap);
     Event.listen("mapOnloaded", this.loadMapHotspots);
+    Event.listen("mapHotspotOnClick", this.mapHotspotOnClick);
     Event.listen("nextScene", this.fetchPano);
     Event.listen("goHome", async () => {
-      await global.krpano.set('view.hlookat', this.project.scene.view.hlookat)
-      await global.krpano.set('view.vlookat', this.project.scene.view.vlookat)
-      await global.krpano.set('view.fov', this.project.scene.view.fov)
+      await global.krpano.set("view.hlookat", this.project.scene.view.hlookat);
+      await global.krpano.set("view.vlookat", this.project.scene.view.vlookat);
+      await global.krpano.set("view.fov", this.project.scene.view.fov);
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
@@ -87,15 +88,14 @@ export default {
     },
 
     async fetchPano(id) {
-      
       let heading = this.project.scene.heading;
-      let currentHlookat = await global.krpano.get('view.hlookat')
-      let currentVlookat = await global.krpano.get('view.vlookat')
-      
+      let currentHlookat = await global.krpano.get("view.hlookat");
+      let currentVlookat = await global.krpano.get("view.vlookat");
+
       this.lastView = {
         hlookat: currentHlookat + heading,
         vlookat: currentVlookat
-      }
+      };
 
       this.API.pano
         .get(id)
@@ -117,7 +117,7 @@ export default {
         })
         .then(res => {
           this.project.scene = res;
-          this.firstEntry = false
+          this.firstEntry = false;
         })
         .then(res => {
           this.initPano();
@@ -196,7 +196,9 @@ export default {
               <skin_settings 
                 layout_maxwidth="${this.project.skin_settings.layout_maxwidth}"
                 showpanomap="${this.project.scene.appliedMap ? true : false}"
-                showpanocompare="${this.project.scene.comparePanorama ? true : false}"
+                showpanocompare="${
+                  this.project.scene.comparePanorama ? true : false
+                }"
                 webvr="${this.project.skin_settings.webvr}"
                 showsetting="${this.project.skin_settings.showsetting}"
                 showhome="${false}"
@@ -229,10 +231,22 @@ export default {
       let heading = this.project.scene.heading;
 
       var xml = ` 
-          <view hlookat="${this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat}" vlookat="${this.lastView ? this.lastView.vlookat : scene.view.vlookat}" fovtype="${scene.view.fovtype}" fov="${scene.view.fov}" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${scene.view.fovmin}" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
-          <preview url="${this.API.pano_url.getImage}/${scene.id}/preview.jpg" />
+          <view hlookat="${
+            this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat
+          }" vlookat="${
+        this.lastView ? this.lastView.vlookat : scene.view.vlookat
+      }" fovtype="${scene.view.fovtype}" fov="${
+        scene.view.fov
+      }" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${
+        scene.view.fovmin
+      }" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
+          <preview url="${this.API.pano_url.getImage}/${
+        scene.id
+      }/preview.jpg" />
           <image>
-              <cube url="${this.API.pano_url.getImage}/${scene.id}/pano_%s.jpg" />
+              <cube url="${this.API.pano_url.getImage}/${
+        scene.id
+      }/pano_%s.jpg" />
           </image>
         `;
 
@@ -249,7 +263,9 @@ export default {
       hotspots.forEach(h => {
         xml += `<hotspot 
                   name="panohotspot-${h.panoramaId}"
-                  url="${this.API.pano_url.getImage}/${h.panoramaId}/border_thumb_128.png"
+                  url="${this.API.pano_url.getImage}/${
+          h.panoramaId
+        }/border_thumb_128.png"
                   width="${h.width || 128}"
                   height="${h.height || 128}"
                   ath="${h.atH}" 
@@ -305,6 +321,11 @@ export default {
       }
 
       await global.krpano.call("addlayer(map)");
+      await global.krpano.set("layer[map].scale", 0.25);
+      await global.krpano.set("layer[map].edge", "leftbottom");
+      await global.krpano.set("layer[map].align", "leftbottom");
+      await global.krpano.set("layer[map].x", 0);
+      await global.krpano.set("layer[map].y", 0);
       await global.krpano.set(
         "layer[map].url",
         `${this.API.map_url.getImage}/${map.id}`
@@ -312,9 +333,6 @@ export default {
       await global.krpano.set("layer[map].keep", true);
       await global.krpano.set("layer[map].handcursor", false);
       await global.krpano.set("layer[map].capture", false);
-      await global.krpano.set("layer[map].align", "leftbottom");
-      await global.krpano.set("layer[map].scale", 0.25);
-      await global.krpano.set("layer[map].alpha", 1.0);
       await global.krpano.set("layer[map].scalechildren", true);
       await global.krpano.set("layer[map].onclick", "openmap();");
       await global.krpano.set(
@@ -333,6 +351,7 @@ export default {
 
     async loadMapHotspots() {
       let map = this.project.scene.appliedMap;
+      await global.krpano.call("tween(layer[map].alpha, 1.0, 0.5, default, set(layer[map].enabled, true););");
 
       await this.addMapLoc(map);
       await this.addMapHotspot(map);
@@ -404,8 +423,12 @@ export default {
         global.krpano.set(`layer[${name}].y`, h.y * height);
         global.krpano.set(
           `layer[${name}].onclick`,
-          `mapspot_loadscene(); skyLentern(nextScene, ${h.linkPanorama.id});`
+          `skyLentern(mapHotspotOnClick, ${h.linkPanorama.id});`
         );
+        // global.krpano.set(
+        //   `layer[${name}].onclick`,
+        //   `skyLentern(mapHotspotOnClick, ${h.linkPanorama.id}); skyLentern(nextScene, ${h.linkPanorama.id});`
+        // );
       });
 
       // for radar
@@ -413,6 +436,15 @@ export default {
         `layer[maphotspot-${this.project.scene.id}].visible`,
         false
       );
+    },
+
+    async mapHotspotOnClick(id) {
+      if(parseFloat(global.krpano.get('layer[map].scale')) > 0.25){
+        await global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
+          set(layer[map].enabled, false);
+          skyLentern(nextScene, ${id}););
+        `)
+      }
     },
 
     showMap() {
@@ -471,29 +503,31 @@ export default {
     setTooltip(id, text) {
       let target = document.getElementById(id);
 
-      if(target){
+      if (target) {
         target.classList.add("tooltip");
         target.innerHTML = `<span class="tooltiptext">${text}</span>`;
-        return true
+        return true;
       }
-      
-      return false
+
+      return false;
     },
 
     setToolbarTips() {
       let timeoutID = setInterval(() => {
-        if( this.setTooltip("btnPanoToolHome", this.$t("default_view")) &&
-        this.setTooltip("btnPanoToolPanomap", this.$t("map")) &&
-        this.setTooltip("btnPanoToolPanocompare", this.$t("compare_mode")) &&
-        this.setTooltip("btnPanoToolSetting", this.$t("setting")) &&
-        this.setTooltip("btnPanoToolFullscreen", this.$t("fullscreen")) &&
-        this.setTooltip("btnPanoToolGyro", this.$t("gyro_mode")) &&
-        this.setTooltip("btnPanoToolVR", this.$t("vr_mode")) &&
-        this.setTooltip("btnPanoToolHide", this.$t("hide")) &&
-        this.setTooltip("btnPanoToolShow", this.$t("show")) &&
-        this.setTooltip("btnPanoToolSync", this.$t("caching")) &&
-        this.setTooltip("btnPanoToolSyncDone", this.$t("cached"))){
-          clearInterval(timeoutID)
+        if (
+          this.setTooltip("btnPanoToolHome", this.$t("default_view")) &&
+          this.setTooltip("btnPanoToolPanomap", this.$t("map")) &&
+          this.setTooltip("btnPanoToolPanocompare", this.$t("compare_mode")) &&
+          this.setTooltip("btnPanoToolSetting", this.$t("setting")) &&
+          this.setTooltip("btnPanoToolFullscreen", this.$t("fullscreen")) &&
+          this.setTooltip("btnPanoToolGyro", this.$t("gyro_mode")) &&
+          this.setTooltip("btnPanoToolVR", this.$t("vr_mode")) &&
+          this.setTooltip("btnPanoToolHide", this.$t("hide")) &&
+          this.setTooltip("btnPanoToolShow", this.$t("show")) &&
+          this.setTooltip("btnPanoToolSync", this.$t("caching")) &&
+          this.setTooltip("btnPanoToolSyncDone", this.$t("cached"))
+        ) {
+          clearInterval(timeoutID);
         }
       }, 500);
     },
