@@ -58,13 +58,13 @@ function preCache(resources) {
 
       // this page
       await promises.push(cache.add(`/view/${shareCode}`))
-      console.log('page done')
+      console.log('page collected')
 
       // static files
       await self.__precacheManifest.forEach(async e => {
         await promises.push(cache.add(e.url))
       })
-      console.log('static files done')
+      console.log('static files collected')
 
       // all information about panorama
       await resources.panoramaIds.forEach(async id => {
@@ -87,7 +87,7 @@ function preCache(resources) {
             })
         )
       })
-      console.log('pano done')
+      console.log('pano collected')
 
       // map images
       await resources.mapIds.forEach(async id => {
@@ -98,9 +98,7 @@ function preCache(resources) {
             })
         )
       })
-      console.log('map done')
-
-      console.log(self.clients.matchAll().then(all => console.log(all)))
+      console.log('map collected')
       Promise.all(promises).then(e => self.clients.matchAll().then(all => all.map(client => client.postMessage({ type: 'PRECACHE_DONE' }))))
     })
 }
