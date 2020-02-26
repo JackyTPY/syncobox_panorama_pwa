@@ -50,8 +50,8 @@ export default {
     Event.listen("mapOnloaded", this.loadMapHotspots);
     Event.listen("mapHotspotOnClick", this.mapHotspotOnClick);
     Event.listen("nextScene", this.fetchPano);
-    Event.listen("goHome", async () => {
-      await global.krpano.call(`
+    Event.listen("goHome", () => {
+      global.krpano.call(`
         lookto(${this.project.scene.view.hlookat},${this.project.scene.view.vlookat},${this.project.scene.view.fov},smooth());
       `);
     });
@@ -312,31 +312,31 @@ export default {
       global.krpano.call("removelayer(map, true)");
     },
 
-    async loadMap(map) {
+    loadMap(map) {
       if (!map) {
         return;
       }
 
-      await global.krpano.call("addlayer(map)");
-      await global.krpano.set("layer[map].scale", 0.25);
-      await global.krpano.set("layer[map].edge", "leftbottom");
-      await global.krpano.set("layer[map].align", "leftbottom");
-      await global.krpano.set("layer[map].x", 0);
-      await global.krpano.set("layer[map].y", 0);
-      await global.krpano.set(
+      global.krpano.call("addlayer(map)");
+      global.krpano.set("layer[map].scale", 0.25);
+      global.krpano.set("layer[map].edge", "leftbottom");
+      global.krpano.set("layer[map].align", "leftbottom");
+      global.krpano.set("layer[map].x", 0);
+      global.krpano.set("layer[map].y", 0);
+      global.krpano.set(
         "layer[map].url",
         `${this.API.map_url.getImage}/${map.id}`
       );
-      await global.krpano.set("layer[map].keep", true);
-      await global.krpano.set("layer[map].handcursor", false);
-      await global.krpano.set("layer[map].capture", false);
-      await global.krpano.set("layer[map].scalechildren", true);
-      await global.krpano.set("layer[map].onclick", "openmap();");
-      await global.krpano.set(
+      global.krpano.set("layer[map].keep", true);
+      global.krpano.set("layer[map].handcursor", false);
+      global.krpano.set("layer[map].capture", false);
+      global.krpano.set("layer[map].scalechildren", true);
+      global.krpano.set("layer[map].onclick", "openmap();");
+      global.krpano.set(
         "layer[map].visible",
         !this.mobileAndTabletcheck()
       );
-      await global.krpano.set(
+      global.krpano.set(
         "layer[map].onloaded",
         "skyLentern(mapOnloaded);"
       );
@@ -360,7 +360,7 @@ export default {
       );
     },
 
-    async addMapLoc(map) {
+    addMapLoc(map) {
       let thisScene = map.hotspots.filter(
         x => x.linkPanorama.id === this.project.scene.id
       )[0];
@@ -368,40 +368,37 @@ export default {
       let height = global.krpano.get("layer[map]").height;
 
       // now location point
-      await global.krpano.call("addlayer(mapactivespot);");
-      await global.krpano.set("layer[mapactivespot].parent", "map");
-      await global.krpano.set("layer[mapactivespot].alpha", 0);
-      await global.krpano.set(
+      global.krpano.call("addlayer(mapactivespot);");
+      global.krpano.set("layer[mapactivespot].parent", "map");
+      global.krpano.set("layer[mapactivespot].alpha", 0);
+      global.krpano.set(
         "layer[mapactivespot].url",
         "/krpano/plugins/mappointactive.png"
       );
-      await global.krpano.set("layer[mapactivespot].align", "lefttop");
-      await global.krpano.set("layer[mapactivespot].edge", "center");
-      await global.krpano.set("layer[mapactivespot].zorder", 3);
-      await global.krpano.set("layer[mapactivespot].keep", true);
-      await global.krpano.set("layer[mapactivespot].x", thisScene.x * width);
-      await global.krpano.set("layer[mapactivespot].y", thisScene.y * height);
+      global.krpano.set("layer[mapactivespot].align", "lefttop");
+      global.krpano.set("layer[mapactivespot].edge", "center");
+      global.krpano.set("layer[mapactivespot].zorder", 3);
+      global.krpano.set("layer[mapactivespot].keep", true);
+      global.krpano.set("layer[mapactivespot].x", thisScene.x * width);
+      global.krpano.set("layer[mapactivespot].y", thisScene.y * height);
 
       // radar
-      await global.krpano.call("addlayer(mapradar);");
-      await global.krpano.set("layer[mapradar].parent", "map");
-      await global.krpano.set("layer[mapradar].alpha", 0);
-      await global.krpano.set("layer[mapradar].url", "/krpano/plugins/radar.js");
-      await global.krpano.set("layer[mapradar].align", "lefttop");
-      await global.krpano.set("layer[mapradar].edge", "center");
-      await global.krpano.set("layer[mapradar].zorder", 2);
-      await global.krpano.set("layer[mapradar].fillalpha", 0.5);
-      await global.krpano.set("layer[mapradar].fillcolor", 0x6fa8dc);
-      await global.krpano.set("layer[mapradar].linewidth", 1.0);
-      await global.krpano.set("layer[mapradar].linecolor", 0xffffff);
-      await global.krpano.set("layer[mapradar].linealpha", 0.5);
-      await global.krpano.set("layer[mapradar].keep", true);
-      await global.krpano.set("layer[mapradar].x", thisScene.x * width);
-      await global.krpano.set("layer[mapradar].y", thisScene.y * height);
-      await global.krpano.set("layer[mapradar].heading", thisScene.heading);
-      
-      // await global.krpano.call(`tween(layer[mapradar].alpha, 1.0, 0.25);`);
-      // await global.krpano.call(`tween(layer[mapactivespot].alpha, 1.0, 0.25);`);
+      global.krpano.call("addlayer(mapradar);");
+      global.krpano.set("layer[mapradar].parent", "map");
+      global.krpano.set("layer[mapradar].alpha", 0);
+      global.krpano.set("layer[mapradar].url", "/krpano/plugins/radar.js");
+      global.krpano.set("layer[mapradar].align", "lefttop");
+      global.krpano.set("layer[mapradar].edge", "center");
+      global.krpano.set("layer[mapradar].zorder", 2);
+      global.krpano.set("layer[mapradar].fillalpha", 0.5);
+      global.krpano.set("layer[mapradar].fillcolor", 0x6fa8dc);
+      global.krpano.set("layer[mapradar].linewidth", 1.0);
+      global.krpano.set("layer[mapradar].linecolor", 0xffffff);
+      global.krpano.set("layer[mapradar].linealpha", 0.5);
+      global.krpano.set("layer[mapradar].keep", true);
+      global.krpano.set("layer[mapradar].x", thisScene.x * width);
+      global.krpano.set("layer[mapradar].y", thisScene.y * height);
+      global.krpano.set("layer[mapradar].heading", thisScene.heading);
     },
 
     addMapHotspot(map) {
@@ -448,7 +445,6 @@ export default {
         );`);
       }
       else{
-        // await global.krpano.call(`tween(layer[mapradar].alpha, 1.0, 0.25);tween(layer[mapactivespot].alpha, 1.0, 0.25);`);
         Event.fire("nextScene", id)
       }
       
