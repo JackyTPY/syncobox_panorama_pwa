@@ -434,15 +434,15 @@ export default {
       );
     },
 
-    async mapHotspotOnClick(id) {
+    mapHotspotOnClick(id) {
       if(parseFloat(global.krpano.get('layer[map].scale')) > 0.25){
-        await global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
+        global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
           set(layer[map].enabled, false);
           skyLentern(nextScene, ${id});
         );`)
       }
       else{
-        await global.krpano.call(`skyLentern(nextScene, ${id});`)
+        Event.fire('nextScene', id);
       }
     },
 
@@ -453,7 +453,6 @@ export default {
     },
 
     controllerDetect(e) {
-      console.log(e);
 
       switch (e.keyCode) {
         // 向左
