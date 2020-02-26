@@ -25,10 +25,14 @@ export default {
     return {
       project: null,
       projectLoaded: false,
-      preCacheDone: false
+      preCacheDone: false,
+      installPromptEvent: null,
+      installPromptDelay: 3000
     };
   },
   async created() {
+    this.manageInstallPrompt();
+
     if ("serviceWorker" in navigator) {
       await navigator.serviceWorker
         .getRegistrations()
@@ -78,11 +82,10 @@ export default {
         console.log(err);
       });
   },
-  updated(){
-    this.define_manifest()
+  updated() {
+    this.define_manifest();
   },
   methods: {
-
     extendProjectData(pano) {
       let formated = {
         plugins: {
@@ -103,7 +106,7 @@ export default {
           webvr: true,
           showsetting: false,
           enableOffline: true,
-          cached: this.preCacheDone,
+          cached: this.preCacheDone
         },
         scene: {
           ...pano,
@@ -183,20 +186,26 @@ export default {
       document.head.querySelector(
         "[name~=msapplication-TileImage]"
       ).content = `${this.API.pano_url.getImage}/${this.project.scene.id}/thumb.jpg`;
+    },
+
+    manageInstallPrompt() {
+      window.addEventListener("beforeinstallprompt", function(e) {
+        e.preventDefault();
+      })
     }
   },
   watch: {
     preCacheDone: function(done) {
       console.log("precachedone", done);
       let timeoutID = setInterval(async () => {
-        console.log('try to set krpano')
+        console.log("try to set krpano");
         if (global.krpano) {
           // await global.krpano.set("layer[skin_btn_sync].visible", !done);
           // await global.krpano.set("layer[skin_btn_syncdone].visible", done);
-          this.project.skin_settings.cached = done
+          this.project.skin_settings.cached = done;
           await global.krpano.set("skin_settings.cached", done);
           await global.krpano.call("arrange_custom_btn();");
-          console.log('setting krpano')
+          console.log("setting krpano");
           clearInterval(timeoutID);
         }
       }, 5000);

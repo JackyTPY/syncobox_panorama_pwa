@@ -457,6 +457,7 @@ export default {
     },
 
     controllerDetect(e) {
+      console.log(e)
       switch (e.keyCode) {
         // 向左
         case 37:
