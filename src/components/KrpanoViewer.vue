@@ -51,9 +51,9 @@ export default {
     Event.listen("mapHotspotOnClick", this.mapHotspotOnClick);
     Event.listen("nextScene", this.fetchPano);
     Event.listen("goHome", async () => {
-      await global.krpano.set("view.hlookat", this.project.scene.view.hlookat);
-      await global.krpano.set("view.vlookat", this.project.scene.view.vlookat);
-      await global.krpano.set("view.fov", this.project.scene.view.fov);
+      await global.krpano.call(`
+        lookto(${this.project.scene.view.hlookat},${this.project.scene.view.vlookat},${this.project.scene.view.fov},smooth());
+      `)
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
