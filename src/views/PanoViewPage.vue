@@ -131,33 +131,29 @@ export default {
         theme_color: "#4DBA87",
         icons: [
           {
-            src:
-              "https://pano-dev.syncobox.com/img/icons/android-chrome-192x192.png",
+            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512.png`,
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src:
-              "https://pano-dev.syncobox.com/img/icons/android-chrome-512x512.png",
+            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512.png`,
             sizes: "512x512",
             type: "image/png"
           },
           {
-            src:
-              "https://pano-dev.syncobox.com/img/icons/android-chrome-maskable-192x192.png",
+            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512_mask.png`,
             sizes: "192x192",
             type: "image/png",
             purpose: "maskable"
           },
           {
-            src:
-              "https://pano-dev.syncobox.com/img/icons/android-chrome-maskable-512x512.png",
+            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512_mask.png`,
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable"
           }
         ],
-        start_url: `https://pano-dev.syncobox.com/view/${this.$route.params.shareCode}`,
+        start_url: `/${this.$route.params.shareCode}`,
         display: "standalone",
         background_color: "#000000"
       };
