@@ -424,6 +424,7 @@ export default {
         global.krpano.set(`layer[${name}].edge`, "center");
         global.krpano.set(`layer[${name}].zorder`, 1);
         global.krpano.set(`layer[${name}].visible`, true);
+        global.krpano.set(`layer[${name}].alpha`, 1.0);
         global.krpano.set(`layer[${name}].keep`, true);
         global.krpano.set(`layer[${name}].tooltip`, h.linkPanorama.name);
         global.krpano.call(`layer[${name}].loadstyle(mapTooltip));`);
@@ -436,10 +437,7 @@ export default {
       });
 
       // for radar
-      global.krpano.set(
-        `layer[maphotspot-${this.project.scene.id}].visible`,
-        false
-      );
+      global.krpano.call(`tween(layer[maphotspot-${this.project.scene.id}].alpha, 0.0, 0.25, default, set(layer[maphotspot-${this.project.scene.id}].visible, false););`);
     },
 
     mapHotspotOnClick(id) {
