@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '2d47f03e-ab89-4d66-beef-4bbbe7d6921f'
+  dockerRegistryServiceConnection: '0e59b763-06bb-4d42-a76c-9d7812abe00f'
   imageRepository: 'syncoboxpanorama'
   containerRegistry: 'webimdocker.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
