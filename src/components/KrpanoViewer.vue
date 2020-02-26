@@ -53,7 +53,7 @@ export default {
     Event.listen("goHome", async () => {
       await global.krpano.call(`
         lookto(${this.project.scene.view.hlookat},${this.project.scene.view.vlookat},${this.project.scene.view.fov},smooth());
-      `)
+      `);
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
@@ -231,24 +231,21 @@ export default {
       let heading = this.project.scene.heading;
 
       var xml = ` 
-          <view hlookat="${
-            this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat
-          }" vlookat="${
-        this.lastView ? this.lastView.vlookat : scene.view.vlookat
-      }" fovtype="${scene.view.fovtype}" fov="${
-        scene.view.fov
-      }" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${
-        scene.view.fovmin
-      }" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
-          <preview url="${this.API.pano_url.getImage}/${
-        scene.id
-      }/preview.jpg" />
-          <image>
-              <cube url="${this.API.pano_url.getImage}/${
-        scene.id
-      }/pano_%s.jpg" />
-          </image>
-        `;
+        <view 
+          hlookat="${ this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat}" 
+          vlookat="${this.lastView ? this.lastView.vlookat : scene.view.vlookat}" 
+          fovtype="${scene.view.fovtype}" 
+          fov="${scene.view.fov}" 
+          maxpixelzoom="${scene.view.maxpixelzoom}" 
+          fovmin="${scene.view.fovmin}" 
+          fovmax="${scene.view.fovmax}" 
+          limitview="${scene.view.limitview}" 
+        />  
+        <preview url="${this.API.pano_url.getImage}/${scene.id}/preview.jpg" />
+        <image>
+          <cube url="${this.API.pano_url.getImage}/${scene.id}/pano_%s.jpg" />
+        </image>
+      `;
 
       return xml;
     },
@@ -351,13 +348,19 @@ export default {
 
     async loadMapHotspots() {
       let map = this.project.scene.appliedMap;
-      await global.krpano.call("tween(layer[map].alpha, 1.0, 0.5, default, set(layer[map].enabled, true););");
-
+      
       await this.addMapLoc(map);
       await this.addMapHotspot(map);
+      await global.krpano.call(
+        `tween(layer[map].alpha, 1.0, 0.5, default, 
+            tween(layer[mapradar].alpha, 1.0, 0.25);
+            tween(layer[mapactivespot].alpha, 1.0, 0.25);
+            set(layer[map].enabled, true);
+        );`
+      );
     },
 
-    addMapLoc(map) {
+    async addMapLoc(map) {
       let thisScene = map.hotspots.filter(
         x => x.linkPanorama.id === this.project.scene.id
       )[0];
@@ -365,35 +368,40 @@ export default {
       let height = global.krpano.get("layer[map]").height;
 
       // now location point
-      global.krpano.call("addlayer(mapactivespot);");
-      global.krpano.set("layer[mapactivespot].parent", "map");
-      global.krpano.set(
+      await global.krpano.call("addlayer(mapactivespot);");
+      await global.krpano.set("layer[mapactivespot].parent", "map");
+      await global.krpano.set("layer[mapactivespot].alpha", 0);
+      await global.krpano.set(
         "layer[mapactivespot].url",
         "/krpano/plugins/mappointactive.png"
       );
-      global.krpano.set("layer[mapactivespot].align", "lefttop");
-      global.krpano.set("layer[mapactivespot].edge", "center");
-      global.krpano.set("layer[mapactivespot].zorder", 3);
-      global.krpano.set("layer[mapactivespot].keep", true);
-      global.krpano.set("layer[mapactivespot].x", thisScene.x * width);
-      global.krpano.set("layer[mapactivespot].y", thisScene.y * height);
+      await global.krpano.set("layer[mapactivespot].align", "lefttop");
+      await global.krpano.set("layer[mapactivespot].edge", "center");
+      await global.krpano.set("layer[mapactivespot].zorder", 3);
+      await global.krpano.set("layer[mapactivespot].keep", true);
+      await global.krpano.set("layer[mapactivespot].x", thisScene.x * width);
+      await global.krpano.set("layer[mapactivespot].y", thisScene.y * height);
 
       // radar
-      global.krpano.call("addlayer(mapradar);");
-      global.krpano.set("layer[mapradar].parent", "map");
-      global.krpano.set("layer[mapradar].url", "/krpano/plugins/radar.js");
-      global.krpano.set("layer[mapradar].align", "lefttop");
-      global.krpano.set("layer[mapradar].edge", "center");
-      global.krpano.set("layer[mapradar].zorder", 2);
-      global.krpano.set("layer[mapradar].fillalpha", 0.5);
-      global.krpano.set("layer[mapradar].fillcolor", 0x6fa8dc);
-      global.krpano.set("layer[mapradar].linewidth", 1.0);
-      global.krpano.set("layer[mapradar].linecolor", 0xffffff);
-      global.krpano.set("layer[mapradar].linealpha", 0.5);
-      global.krpano.set("layer[mapradar].keep", true);
-      global.krpano.set("layer[mapradar].x", thisScene.x * width);
-      global.krpano.set("layer[mapradar].y", thisScene.y * height);
-      global.krpano.set("layer[mapradar].heading", thisScene.heading);
+      await global.krpano.call("addlayer(mapradar);");
+      await global.krpano.set("layer[mapradar].parent", "map");
+      await global.krpano.set("layer[mapradar].alpha", 0);
+      await global.krpano.set("layer[mapradar].url", "/krpano/plugins/radar.js");
+      await global.krpano.set("layer[mapradar].align", "lefttop");
+      await global.krpano.set("layer[mapradar].edge", "center");
+      await global.krpano.set("layer[mapradar].zorder", 2);
+      await global.krpano.set("layer[mapradar].fillalpha", 0.5);
+      await global.krpano.set("layer[mapradar].fillcolor", 0x6fa8dc);
+      await global.krpano.set("layer[mapradar].linewidth", 1.0);
+      await global.krpano.set("layer[mapradar].linecolor", 0xffffff);
+      await global.krpano.set("layer[mapradar].linealpha", 0.5);
+      await global.krpano.set("layer[mapradar].keep", true);
+      await global.krpano.set("layer[mapradar].x", thisScene.x * width);
+      await global.krpano.set("layer[mapradar].y", thisScene.y * height);
+      await global.krpano.set("layer[mapradar].heading", thisScene.heading);
+      
+      // await global.krpano.call(`tween(layer[mapradar].alpha, 1.0, 0.25);`);
+      // await global.krpano.call(`tween(layer[mapactivespot].alpha, 1.0, 0.25);`);
     },
 
     addMapHotspot(map) {
@@ -439,11 +447,13 @@ export default {
         global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
           set(layer[map].enabled, false);
           skyLentern(nextScene, ${id});
-        );`)
+        );`);
       }
       else{
-        Event.fire('nextScene', id);
+        // await global.krpano.call(`tween(layer[mapradar].alpha, 1.0, 0.25);tween(layer[mapactivespot].alpha, 1.0, 0.25);`);
+        Event.fire("nextScene", id)
       }
+      
     },
 
     showMap() {
@@ -453,7 +463,6 @@ export default {
     },
 
     controllerDetect(e) {
-
       switch (e.keyCode) {
         // 向左
         case 37:

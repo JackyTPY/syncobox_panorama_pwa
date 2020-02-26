@@ -130,22 +130,22 @@ export default {
         short_name: this.project.scene.name,
         theme_color: "#4DBA87",
         icons: [
-          {
-            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512.png`,
-            sizes: "192x192",
-            type: "image/png"
-          },
+          // {
+          //   src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512.png`,
+          //   sizes: "192x192",
+          //   type: "image/png"
+          // },
           {
             src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512.png`,
             sizes: "512x512",
             type: "image/png"
           },
-          {
-            src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512_mask.png`,
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "maskable"
-          },
+          // {
+          //   src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512_mask.png`,
+          //   sizes: "192x192",
+          //   type: "image/png",
+          //   purpose: "maskable"
+          // },
           {
             src: `${this.API.pano_url.getImage}/${this.project.scene.id}/pwa_thumb_512_mask.png`,
             sizes: "512x512",
@@ -153,7 +153,7 @@ export default {
             purpose: "maskable"
           }
         ],
-        start_url: `/${this.$route.params.shareCode}`,
+        start_url: `${window.location.origin}/${this.$route.params.shareCode}`,
         display: "standalone",
         background_color: "#000000"
       };
