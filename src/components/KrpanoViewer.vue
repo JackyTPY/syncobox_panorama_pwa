@@ -88,7 +88,7 @@ export default {
 
     async fetchPano(id) {
       
-      let heading = this.project.scene.appliedMap.hotspots.find(x => x.linkPanorama.id === this.project.scene.id).heading;
+      let heading = this.project.scene.heading;
       let currentHlookat = await global.krpano.get('view.hlookat')
       let currentVlookat = await global.krpano.get('view.vlookat')
       
@@ -196,9 +196,7 @@ export default {
               <skin_settings 
                 layout_maxwidth="${this.project.skin_settings.layout_maxwidth}"
                 showpanomap="${this.project.scene.appliedMap ? true : false}"
-                showpanocompare="${
-                  this.project.scene.comparePanorama ? true : false
-                }"
+                showpanocompare="${this.project.scene.comparePanorama ? true : false}"
                 webvr="${this.project.skin_settings.webvr}"
                 showsetting="${this.project.skin_settings.showsetting}"
                 showhome="${false}"
@@ -228,7 +226,7 @@ export default {
         return "";
       }
 
-      let heading = this.project.scene.appliedMap.hotspots.find(x => x.linkPanorama.id === this.project.scene.id).heading;
+      let heading = this.project.scene.heading;
 
       var xml = ` 
           <view hlookat="${this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat}" vlookat="${this.lastView ? this.lastView.vlookat : scene.view.vlookat}" fovtype="${scene.view.fovtype}" fov="${scene.view.fov}" maxpixelzoom="${scene.view.maxpixelzoom}" fovmin="${scene.view.fovmin}" fovmax="${scene.view.fovmax}" limitview="${scene.view.limitview}" />
@@ -251,9 +249,7 @@ export default {
       hotspots.forEach(h => {
         xml += `<hotspot 
                   name="panohotspot-${h.panoramaId}"
-                  url="${this.API.pano_url.getImage}/${
-          h.panoramaId
-        }/border_thumb_128.png"
+                  url="${this.API.pano_url.getImage}/${h.panoramaId}/border_thumb_128.png"
                   width="${h.width || 128}"
                   height="${h.height || 128}"
                   ath="${h.atH}" 
