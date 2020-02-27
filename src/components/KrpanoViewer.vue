@@ -5,11 +5,13 @@
 <script>
 import Vue from "vue";
 import { API } from "../api.js";
+import gamepad from "@/mixins/gamepad"
+import device from "@/mixins/device"
 
 export default {
   name: "viewer",
   ref: "viewer",
-
+  mixins: [gamepad, device],
   props: {
     API: {
       type: Object,
@@ -58,8 +60,8 @@ export default {
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
-    if (this.mobileAndTabletcheck())
-      document.addEventListener("keydown", this.controllerDetect);
+    // if (this.mobileAndTabletcheck())
+    //   document.addEventListener("keydown", this.controllerDetect);
   },
 
   mounted() {
@@ -455,41 +457,8 @@ export default {
       global.krpano.set("layer[map].visible", !isVisible);
     },
 
-    setBTController() {
-      document.addEventListener("keydown", this.controllerDetect);
+    decodeController(axes){
 
-      if (!("ongamepadconnected" in window)) {
-        // No gamepad events available, poll instead.
-        interval = setInterval(pollGamepads, 500);
-      }
-
-      window.addEventListener("gamepadconnected", function(event) {
-        var gp = navigator.getGamepads()[e.gamepad.index];
-        console.log("Gamepad connected: ", gp);
-        document.removeEventListener("keydown", this.controllerDetect);
-        this.gameLoop();
-      });
-
-      window.addEventListener("gamepaddisconnected", function(e) {
-        console.log("Waiting for gamepad.");
-        cancelRequestAnimationFrame(start);
-      });
-    },
-
-    pollGamepads() {
-      var gamepads = navigator.getGamepads
-        ? navigator.getGamepads()
-        : navigator.webkitGetGamepads
-        ? navigator.webkitGetGamepads
-        : [];
-      for (var i = 0; i < gamepads.length; i++) {
-        var gp = gamepads[i];
-        if (gp) {
-          console.log(`Gamepad connected at index ${gp.index}: ${gp.id}. It has ${gp.buttons.length} buttons and  ${gp.axes.length} axes.`);
-          gameLoop();
-          clearInterval(interval);
-        }
-      }
     },
 
     controllerDetect(e) {
@@ -590,6 +559,16 @@ export default {
           check = true;
       })(navigator.userAgent || navigator.vendor || window.opera);
       return check;
+    }
+  },
+  watch: {
+    'axes': {
+      handler(newvalue){
+        if(newvalue && newvalue.length > 0){
+          this.decodeController(newvalue);
+        }
+      },
+      deep: true
     }
   }
 };
