@@ -507,7 +507,7 @@ export default {
 
       if (target) {
         target.classList.add("tooltip");
-        target.innerHTML = `<span class="tooltiptext">${text}</span>`;
+        target.innerHTML += `<span class="tooltiptext">${text}</span>`;
         return true;
       }
 
