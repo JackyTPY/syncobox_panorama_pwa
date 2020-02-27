@@ -218,7 +218,7 @@ export default {
         global.krpano.call(
           "loadxml(" +
             escape(xmlstring) +
-            ", null, MERGE, get(skin_settings.loadscene_blend));"
+            ", null, MERGE, BLEND(0.5));"
         );
       }
     },
