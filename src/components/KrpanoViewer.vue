@@ -29,7 +29,8 @@ export default {
   data: () => ({
     intervalID: null,
     currentAlpha: 0,
-    lastView: null
+    lastView: null,
+    getGPIntervalID: null
   }),
   beforeCreate() {
     window.Event = new (class {
@@ -232,8 +233,12 @@ export default {
 
       var xml = ` 
         <view 
-          hlookat="${ this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat}" 
-          vlookat="${this.lastView ? this.lastView.vlookat : scene.view.vlookat}" 
+          hlookat="${
+            this.lastView ? this.lastView.hlookat - heading : scene.view.hlookat
+          }" 
+          vlookat="${
+            this.lastView ? this.lastView.vlookat : scene.view.vlookat
+          }" 
           fovtype="${scene.view.fovtype}" 
           fov="${scene.view.fov}" 
           maxpixelzoom="${scene.view.maxpixelzoom}" 
@@ -332,14 +337,8 @@ export default {
       global.krpano.set("layer[map].capture", false);
       global.krpano.set("layer[map].scalechildren", true);
       global.krpano.set("layer[map].onclick", "openmap();");
-      global.krpano.set(
-        "layer[map].visible",
-        !this.mobileAndTabletcheck()
-      );
-      global.krpano.set(
-        "layer[map].onloaded",
-        "skyLentern(mapOnloaded);"
-      );
+      global.krpano.set("layer[map].visible", !this.mobileAndTabletcheck());
+      global.krpano.set("layer[map].onloaded", "skyLentern(mapOnloaded);");
 
       if (global.krpano.get("layer[map]")) {
         this.loadMapHotspots();
@@ -348,7 +347,7 @@ export default {
 
     async loadMapHotspots() {
       let map = this.project.scene.appliedMap;
-      
+
       await this.addMapLoc(map);
       await this.addMapHotspot(map);
       await global.krpano.call(
@@ -434,20 +433,20 @@ export default {
       });
 
       // for radar
-      global.krpano.call(`tween(layer[maphotspot-${this.project.scene.id}].alpha, 0.0, 0.25, default, set(layer[maphotspot-${this.project.scene.id}].visible, false););`);
+      global.krpano.call(
+        `tween(layer[maphotspot-${this.project.scene.id}].alpha, 0.0, 0.25, default, set(layer[maphotspot-${this.project.scene.id}].visible, false););`
+      );
     },
 
     mapHotspotOnClick(id) {
-      if(parseFloat(global.krpano.get('layer[map].scale')) > 0.25){
+      if (parseFloat(global.krpano.get("layer[map].scale")) > 0.25) {
         global.krpano.call(`tween(layer[map].alpha, 0.0, 0.25, default, 
           set(layer[map].enabled, false);
           skyLentern(nextScene, ${id});
         );`);
+      } else {
+        Event.fire("nextScene", id);
       }
-      else{
-        Event.fire("nextScene", id)
-      }
-      
     },
 
     showMap() {
@@ -456,8 +455,45 @@ export default {
       global.krpano.set("layer[map].visible", !isVisible);
     },
 
+    setBTController() {
+      document.addEventListener("keydown", this.controllerDetect);
+
+      if (!("ongamepadconnected" in window)) {
+        // No gamepad events available, poll instead.
+        interval = setInterval(pollGamepads, 500);
+      }
+
+      window.addEventListener("gamepadconnected", function(event) {
+        var gp = navigator.getGamepads()[e.gamepad.index];
+        console.log("Gamepad connected: ", gp);
+        document.removeEventListener("keydown", this.controllerDetect);
+        this.gameLoop();
+      });
+
+      window.addEventListener("gamepaddisconnected", function(e) {
+        console.log("Waiting for gamepad.");
+        cancelRequestAnimationFrame(start);
+      });
+    },
+
+    pollGamepads() {
+      var gamepads = navigator.getGamepads
+        ? navigator.getGamepads()
+        : navigator.webkitGetGamepads
+        ? navigator.webkitGetGamepads
+        : [];
+      for (var i = 0; i < gamepads.length; i++) {
+        var gp = gamepads[i];
+        if (gp) {
+          console.log(`Gamepad connected at index ${gp.index}: ${gp.id}. It has ${gp.buttons.length} buttons and  ${gp.axes.length} axes.`);
+          gameLoop();
+          clearInterval(interval);
+        }
+      }
+    },
+
     controllerDetect(e) {
-      console.log(e)
+      console.log(e);
       switch (e.keyCode) {
         // 向左
         case 37:
