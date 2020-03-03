@@ -4,6 +4,7 @@ export default {
 
   data: () => ({
     controllers: {},
+    controllersNumber: 0,
     threshold: 0.9,
     axes: [],
     btns: [],
@@ -31,6 +32,7 @@ export default {
     },
     addgamepad(gamepad) {
       console.log('add gamepad: ', gamepad);
+      ++this.controllersNumber;
       this.controllers[gamepad.index] = gamepad;
       rAF(this.updateStatus);
     },
@@ -40,6 +42,7 @@ export default {
     },
     removegamepad(gamepad) {
       console.log('remove gamepad: ', gamepad)
+      --this.controllersNumber;
       delete this.controllers[gamepad.index];
     },
     updateStatus() {
@@ -49,7 +52,7 @@ export default {
       for (var j in this.controllers) {
         var controller = this.controllers[j];
 
-        this.btns = [];
+        this.btns = new Array(controller.buttons.length).fill(false);
         for (var i = 0; i < controller.buttons.length; i++) {
           var val = controller.buttons[i];
           var pressed = val == 1.0;
@@ -58,15 +61,15 @@ export default {
             val = val.value;
           }
           if (pressed) {
-            this.btns[i] = true
+            this.$set(this.btns, i, true)
             console.log(`button ${i} pressed`)
           }
         }
 
-        this.axes = []
+        this.axes = new Array(controller.axes.length).fill(0)
         for (var i = 0; i < controller.axes.length; i++) {
           if(Math.abs(controller.axes[i]) > this.threshold){
-            this.axes[i] = true
+            this.$set(this.axes, i, controller.axes[i])
             console.log(`axis ${i} actived: ${controller.axes[i]}`)
           }
         }

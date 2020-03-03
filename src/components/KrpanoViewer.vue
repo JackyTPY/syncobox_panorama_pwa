@@ -60,8 +60,8 @@ export default {
     });
     Event.listen("skinOnLoad", this.setToolbarTips);
 
-    // if (this.mobileAndTabletcheck())
-    //   document.addEventListener("keydown", this.controllerDetect);
+    if (this.mobileAndTabletcheck())
+      document.addEventListener("keydown", this.controllerDetect);
   },
 
   mounted() {
@@ -458,7 +458,25 @@ export default {
     },
 
     decodeController(axes){
-
+      console.log(this.device.supporter)
+      switch(this.device.supporter){
+        case 'chrome': 
+          if(axes[0] === 1){
+            this.fade("out");
+          }
+          if(axes[0] === -1){
+            this.fade("in");
+          }
+          break;
+        case 'safari':
+          if(axes[2] === 1){
+            this.fade("out");
+          }
+          if(axes[2] === -1){
+            this.fade("in");
+          }
+          break;
+      }
     },
 
     controllerDetect(e) {
@@ -569,6 +587,11 @@ export default {
         }
       },
       deep: true
+    },
+    'controllersNumber': function(num){
+      if(num > 0){
+        document.removeEventListener("keydown", this.controllerDetect);
+      }
     }
   }
 };
