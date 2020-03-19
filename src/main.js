@@ -2,6 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
+import KrpanoVue from 'krpano-vue'
+
+Vue.use(KrpanoVue);
 
 Vue.config.productionTip = false
 

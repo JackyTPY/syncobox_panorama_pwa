@@ -1,20 +1,16 @@
 <template>
-  <KrpanoViewer :project.sync="project" :API="API" v-if="projectLoaded" pwa />
+  <v-krpano-viewer :project.sync="project" :API="API" v-if="projectLoaded" pwa />
 </template>
 
 
 <script>
 // @ is an alias to /src
 import vue from "vue";
-import KrpanoViewer from "@/components/KrpanoVue/KrpanoViewer.vue";
 import { API } from "../api.js";
 import { register } from "register-service-worker";
 
 export default {
   name: "viewer",
-  components: {
-    KrpanoViewer
-  },
   props: {
     API: {
       type: Object,
@@ -88,26 +84,7 @@ export default {
   methods: {
     extendProjectData(pano) {
       let formated = {
-        plugins: {
-          contextmenu: true,
-          comparemode: true,
-          circle_hotspots: false,
-          webim: true,
-          dragablehotspots: false,
-          vtourskin: true,
-          map: true,
-          gyro: true,
-          scope: false
-        },
-        skin_settings: {
-          layout_maxwidth: 600,
-          showpanomap: true,
-          showpanocompare: true,
-          webvr: true,
-          showsetting: false,
-          enableOffline: true,
-          cached: this.preCacheDone
-        },
+        cached: this.preCacheDone,
         scene: {
           ...pano,
           view: {
