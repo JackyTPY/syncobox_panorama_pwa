@@ -6,7 +6,7 @@
 <script>
 // @ is an alias to /src
 import vue from "vue";
-import KrpanoViewer from "@/components/KrpanoViewer.vue";
+import KrpanoViewer from "@/components/KrpanoVue/KrpanoViewer.vue";
 import { API } from "../api.js";
 import { register } from "register-service-worker";
 
@@ -230,7 +230,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scope>
 html,
 body,
 #pano {

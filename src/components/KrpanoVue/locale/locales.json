@@ -1,0 +1,29 @@
+{
+  "en": {
+    "default_view": "default view",
+    "map": "map",
+    "compare_mode": "compare",
+    "setting": "setting",
+    "fullscreen": "fullscreen",
+    "gyro_mode": "gyro",
+    "vr_mode": "VR",
+    "hide": "hide",
+    "show": "show",
+    "caching": "caching",
+    "cached": "cached",
+    "fov_value_error": "FOV value is not allowed"
+  },
+  "zh-TW": {
+    "default_view": "預設視角",
+    "map": "地圖",
+    "compare_mode": "比較模式",
+    "setting": "設定",
+    "fullscreen": "全螢幕",
+    "gyro_mode": "陀螺儀模式",
+    "vr_mode": "VR模式",
+    "hide": "隱藏",
+    "show": "顯示",
+    "caching": "緩存中",
+    "cached": "離線完成"
+  }
+}
