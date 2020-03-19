@@ -28,6 +28,12 @@ self.addEventListener('install', event => {
     })
     .then(res => res.json())
     .then(data => preCache(data))
+    .then(() => {
+      self.skipWaiting()
+    })
+    .catch(err => {
+      self.skipWaiting()
+    })
 
 })
 
@@ -74,7 +80,7 @@ function preCache(resources) {
     .then(async cache => {
 
       // this page
-      promises.push(cache.add(`/view/${shareCode}`))
+      promises.push(cache.add(`/${shareCode}`))
       console.log('page collected')
 
       // static files

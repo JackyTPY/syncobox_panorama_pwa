@@ -30,18 +30,14 @@ export default {
     this.manageInstallPrompt();
 
     if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker
-        .getRegistrations()
-        .then(async function(registrations) {
-          for (let registration of registrations) {
-            await registration.unregister();
-          }
-        });
       await navigator.serviceWorker.register(
         `/service-worker.js?shareCode=${encodeURIComponent(
           this.$route.params.shareCode
         )}`
-      );
+      )
+      .then(reg => {
+        reg.update()
+      });
     }
 
     caches
@@ -195,7 +191,7 @@ export default {
         if (global.krpano) {
           // await global.krpano.set("layer[skin_btn_sync].visible", !done);
           // await global.krpano.set("layer[skin_btn_syncdone].visible", done);
-          this.project.skin_settings.cached = done;
+          this.project.cached = done;
           await global.krpano.set("skin_settings.cached", done);
           await global.krpano.call("arrange_custom_btn();");
           console.log("setting krpano");
