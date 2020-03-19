@@ -22,6 +22,10 @@ export default {
     id: {
       type: String,
       default: () => ""
+    },
+    pwa: {
+      type: Boolean,
+      default: false
     }
   },
   data: () => ({

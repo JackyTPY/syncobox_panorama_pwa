@@ -17,6 +17,9 @@ self.addEventListener('install', event => {
   fetch(`${api_base}/PanoramaPWA/${shareCode}?${time}`)
     .then(async res => {
       await caches.delete(cacheName)
+      return res
+    })
+    .then(async res => {
       await caches.open(cacheName)
         .then(async cache => {
           await cache.put(`${api_base}/PanoramaPWA/${shareCode}`, res.clone())
@@ -25,7 +28,7 @@ self.addEventListener('install', event => {
     })
     .then(res => res.json())
     .then(data => preCache(data))
- 
+
 })
 
 self.addEventListener('activate', function (event) {

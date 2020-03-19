@@ -107,7 +107,7 @@ export default {
             webvr="${!this.KrpanoEditor}"
             showsetting="${false}"
             showhome="${false}"
-            enableOffline="${false}"
+            enableOffline="${this.pwa}"
             cached="${false}"
           />
           

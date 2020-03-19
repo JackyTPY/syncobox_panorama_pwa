@@ -1,5 +1,5 @@
 <template>
-  <KrpanoViewer :project.sync="project" :API="API" v-if="projectLoaded" />
+  <KrpanoViewer :project.sync="project" :API="API" v-if="projectLoaded" pwa />
 </template>
 
 
