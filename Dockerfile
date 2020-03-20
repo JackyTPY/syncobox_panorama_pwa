@@ -6,8 +6,10 @@ ARG NPM_TOKEN
 
 ENV NPM_TOKEN=$NPM_TOKEN
 ENV VUE_APP_BUILD_MODE=$VUE_APP_BUILD_MODE
+ENV NODE_ENV=$NODE_ENV
 
 RUN echo  "$VUE_APP_BUILD_MODE"
+RUN echo  "$NODE_ENV"
 # RUN echo  "$NPM_TOKEN"
 # make the 'app' folder the current working directory
 WORKDIR /app

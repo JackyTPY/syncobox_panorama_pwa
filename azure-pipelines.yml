@@ -37,6 +37,7 @@ stages:
         buildContext: $(dockerbuildContext)
         arguments: |
          --build-arg NPM_TOKEN=$(NPM_TOKEN)
+         --build-arg NODE_ENV=$(NODE_ENV)
          -t $(containerRegistry)/$(imageRepository):$(tag)
          -t $(containerRegistry)/$(imageRepository):latest
         tags: |
