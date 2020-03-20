@@ -72,6 +72,7 @@ export default {
       .then(() => this.define_manifest())
       .catch(err => {
         console.log(err);
+        this.$router.push({ name: '404' })
       });
   },
   updated() {

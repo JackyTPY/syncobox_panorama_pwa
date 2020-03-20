@@ -8,7 +8,16 @@ const routes = [
     path: "/:shareCode",
     name: "PanoramaViewer",
     component: () =>
-        import ( /* webpackChunkName: "about" */ "../views/PanoViewPage.vue")
+        import ( /* webpackChunkName: "about" */ "@/views/PanoViewPage.vue")
+  },
+  {
+    name: '404',
+    path: '/error/404notFound',
+    component: () => import('@/views/404.vue')
+  },
+  {
+    path: '*',
+    redirect: '/error/404notFound'
   }
 ]
 
