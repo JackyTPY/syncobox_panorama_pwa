@@ -6,17 +6,11 @@ import KrpanoVue from 'krpano-vue'
 import VueAnalytics from 'vue-analytics'
 import vuetify from './plugins/vuetify';
 
-var production = process.env.NODE_ENV == 'production'
-
 Vue.use(KrpanoVue);
 
 Vue.use(VueAnalytics, {
   id: 'UA-161417188-1',
   router,
-  debug: {
-    enabled: !production,
-    sendHitTask: production
-  },
   autoTracking: {
     pageviewOnLoad: false
   }
