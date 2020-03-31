@@ -58,7 +58,7 @@ export default {
       });
   },
   mounted() {
-    if (!this.$route.params.shareCode || this.$route.params.shareCode.includes("service-worker.js")) {
+    if (!this.$route.params.shareCode) {
       return;
     }
 
