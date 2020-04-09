@@ -30,14 +30,15 @@ export default {
     this.manageInstallPrompt();
 
     if ("serviceWorker" in navigator) {
-      await navigator.serviceWorker.register(
-        `/service-worker.js?shareCode=${encodeURIComponent(
-          this.$route.params.shareCode
-        )}`
-      )
-      .then(reg => {
-        reg.update()
-      });
+      await navigator.serviceWorker
+        .register(
+          `/service-worker.js?shareCode=${encodeURIComponent(
+            this.$route.params.shareCode
+          )}`
+        )
+        .then(reg => {
+          reg.update();
+        });
     }
 
     caches
@@ -72,7 +73,7 @@ export default {
       .then(() => this.define_manifest())
       .catch(err => {
         console.log(err);
-        this.$router.push({ name: '404' })
+        this.$router.push({ name: "404" });
       });
   },
   updated() {
@@ -210,8 +211,5 @@ body,
 #pano {
   width: 100%;
   height: 100%;
-  overflow: auto;
-  margin: 0;
-  padding: 0;
 }
 </style>
