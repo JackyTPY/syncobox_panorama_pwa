@@ -4,7 +4,7 @@ import router from './router'
 import i18n from './i18n'
 import KrpanoVue from 'krpano-vue'
 import VueAnalytics from 'vue-analytics'
-import vuetify from './plugins/vuetify';
+import vuetify from './plugins/vuetify'
 
 Vue.use(KrpanoVue);
 

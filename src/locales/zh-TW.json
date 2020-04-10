@@ -9,5 +9,8 @@
   "show": "顯示",
   "vr_mode": "VR模式",
   "caching": "緩存中",
-  "cached": "離線完成"
+  "cached": "離線完成",
+  "Whoops_404": "糟糕, 404",
+  "the_page_you_were_looking_for_does_not_exist": "你要找的頁面不存在!",
+  "get_me_out_of_here": "讓我離開這裡"
 }
