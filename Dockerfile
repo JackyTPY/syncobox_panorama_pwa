@@ -6,15 +6,13 @@ ARG NPM_TOKEN
 
 ENV NPM_TOKEN=$NPM_TOKEN
 ENV VUE_APP_BUILD_MODE=$VUE_APP_BUILD_MODE
-ENV NODE_ENV=$NODE_ENV
 
 RUN echo  "$VUE_APP_BUILD_MODE"
-RUN echo  "$NODE_ENV"
 # RUN echo  "$NPM_TOKEN"
 # make the 'app' folder the current working directory
 WORKDIR /app
 
-COPY .npmrc .npmrc  
+COPY .npmrc .npmrc
 
 RUN cat .npmrc
 
@@ -27,7 +25,7 @@ RUN npm config set '//pkgs.dev.azure.com/webimrd/WeBIM_Artifact_Test/_packaging/
 
 RUN npm config set '//pkgs.dev.azure.com/webimrd/WeBIM_Artifact_Test/_packaging/panorama-map/npm/:_password' "${NPM_TOKEN}"
 
-RUN npm install 
+RUN npm install
 
 RUN rm -f .npmrc
 
@@ -49,4 +47,3 @@ COPY --from=build-stage /app/dist .
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-
